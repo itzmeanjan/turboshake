@@ -13,6 +13,10 @@ pub struct TurboShake128 {
 }
 
 impl TurboShake128 {
+    /// If you don't need multiple instances of TurboSHAKE128, feel free to pass
+    /// this as domain seperator constant, during finalization.
+    pub const DEFAULT_DOMAIN_SEPARATOR: u8 = 0x1f;
+
     const CAPACITY_BITS: usize = 256;
     const RATE_BITS: usize = 1600 - Self::CAPACITY_BITS;
     const RATE_BYTES: usize = Self::RATE_BITS / 8;
@@ -100,11 +104,16 @@ impl TurboShake128 {
     /// read arbitrary many bytes by squeezing sponge, which is done by calling squeeze()
     /// function, as many times required.
     ///
+    /// Consider using D = 0x1f, if you don't need multiple instances of TurboSHAKE128 XOF.
+    ///
     /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/shake128.hpp#L132-L192
     pub fn finalize<const D: u8>(&mut self) {
         if self.is_ready == usize::MAX {
             return;
         }
+
+        // See top of page 2 of https://ia.cr/2023/342
+        debug_assert!(D >= 0x01 && D <= 0x7f);
 
         let mut blk_bytes = [0u8; Self::RATE_BYTES];
         blk_bytes[self.offset] = D;
