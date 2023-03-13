@@ -175,3 +175,12 @@ fn round(state: &mut [u64; 25], ridx: u32) {
     *state = chi(state);
     iota(state, ridx);
 }
+
+/// Keccak-p\[1600, 12\] permutation, applying 12 rounds of permutation
+/// on state of dimension 5 x 5 x 64 ( = 1600 -bits ), following algorithm 7 defined
+/// in section 3.3 of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L253-L493
+pub fn permute(state: &mut [u64; 25]) {
+    (SIDX..(EIDX + 1)).for_each(|ridx| round(state, ridx));
+}
