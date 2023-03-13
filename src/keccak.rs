@@ -1,3 +1,18 @@
+/// Logarithm base 2 of bit width of lane of Keccak-p\[1600, 12\] permutation
+const L: u32 = 6;
+
+/// Bit width of each lane of Keccak-p\[1600, 12\] permutation
+const W: u32 = 1 << L;
+
+/// \# -of rounds of Keccak permutation is applied per iteration
+const ROUNDS: u32 = 12;
+
+/// Starting index of Keccak permutation round
+const SIDX: u32 = 12 + 2 * L - ROUNDS;
+
+/// End index of Keccak permutation round
+const EIDX: u32 = 12 + 2 * L - 1;
+
 /// Keccak-p\[1600, 12\] step mapping function θ, see section 3.2.1 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
@@ -38,33 +53,32 @@ fn theta(state: &mut [u64; 25]) {
 ///
 /// Lane rotation factor table taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L25-L35
 fn rho(state: &mut [u64; 25]) {
-    const LANE_SIZE: u32 = 64;
     const ROT: [u32; 25] = [
-        0 % LANE_SIZE,
-        1 % LANE_SIZE,
-        190 % LANE_SIZE,
-        28 % LANE_SIZE,
-        91 % LANE_SIZE,
-        36 % LANE_SIZE,
-        300 % LANE_SIZE,
-        6 % LANE_SIZE,
-        55 % LANE_SIZE,
-        276 % LANE_SIZE,
-        3 % LANE_SIZE,
-        10 % LANE_SIZE,
-        171 % LANE_SIZE,
-        153 % LANE_SIZE,
-        231 % LANE_SIZE,
-        105 % LANE_SIZE,
-        45 % LANE_SIZE,
-        15 % LANE_SIZE,
-        21 % LANE_SIZE,
-        136 % LANE_SIZE,
-        210 % LANE_SIZE,
-        66 % LANE_SIZE,
-        253 % LANE_SIZE,
-        120 % LANE_SIZE,
-        78 % LANE_SIZE,
+        0 % W,
+        1 % W,
+        190 % W,
+        28 % W,
+        91 % W,
+        36 % W,
+        300 % W,
+        6 % W,
+        55 % W,
+        276 % W,
+        3 % W,
+        10 % W,
+        171 % W,
+        153 % W,
+        231 % W,
+        105 % W,
+        45 % W,
+        15 % W,
+        21 % W,
+        136 % W,
+        210 % W,
+        66 % W,
+        253 % W,
+        120 % W,
+        78 % W,
     ];
 
     for i in 0..25 {
@@ -109,4 +123,42 @@ fn chi(state: [u64; 25]) -> [u64; 25] {
         .collect::<Vec<u64>>()
         .try_into()
         .unwrap()
+}
+
+/// Keccak-p\[1600, 12\] step mapping function ι, see section 3.2.5 of SHA3
+/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
+///
+/// Round constants taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L134-L141
+fn iota(state: &mut [u64; 25], ridx: u32) {
+    debug_assert!(ridx >= SIDX && ridx <= EIDX);
+
+    const RC: [u64; 24] = [
+        1,
+        32898,
+        9223372036854808714,
+        9223372039002292224,
+        32907,
+        2147483649,
+        9223372039002292353,
+        9223372036854808585,
+        138,
+        136,
+        2147516425,
+        2147483658,
+        2147516555,
+        9223372036854775947,
+        9223372036854808713,
+        9223372036854808579,
+        9223372036854808578,
+        9223372036854775936,
+        32778,
+        9223372039002259466,
+        9223372039002292353,
+        9223372036854808704,
+        2147483649,
+        9223372039002292232,
+    ];
+    state[0] ^= RC[ridx as usize];
 }
