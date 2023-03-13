@@ -7,8 +7,7 @@ use crate::keccak;
 pub struct TurboShake128 {
     state: [u64; 25],
     offset: usize,
-    absorbed: usize,
-    ready: usize,
+    is_ready: usize,
     squeezable: usize,
 }
 
@@ -25,8 +24,7 @@ impl TurboShake128 {
         Self {
             state: [0u64; 25],
             offset: 0,
-            absorbed: 0,
-            ready: 0,
+            is_ready: 0,
             squeezable: 0,
         }
     }
@@ -35,11 +33,11 @@ impl TurboShake128 {
     ///
     /// Note, this routine can be called arbitrary number of times, each time with arbitrary
     /// bytes of input message, until keccak[256] state is finalized ( by calling routine with
-    /// similar name ).
+    /// similar name ). Once finalized, calling this routine again doesn't do anything.
     ///
     /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/shake128.hpp#L43-L130
     pub fn absorb(&mut self, msg: &[u8]) {
-        if self.ready == usize::MAX {
+        if self.is_ready == usize::MAX {
             return;
         }
 
@@ -90,7 +88,34 @@ impl TurboShake128 {
             keccak::permute(&mut self.state);
             self.offset = 0;
         }
+    }
 
-        self.absorbed += mlen;
+    /// After consuming N -bytes ( by invoking absorb routine arbitrary many times,
+    /// each time with arbitrary input bytes ), this routine is invoked when no more
+    /// input bytes remaining to be consumed into Keccak[256] sponge state.
+    ///
+    /// Note, once this routine is called, calling absorb() or finalize() again, on same
+    /// TurboSHAKE128 object doesn't do anything. After finalization, one might wish to
+    /// read arbitrary many bytes by squeezing sponge, which is done by calling squeeze()
+    /// function, as many times required.
+    pub fn finalize<const D: u8>(&mut self) {
+        if self.is_ready == usize::MAX {
+            return;
+        }
+
+        let mut blk_bytes = [0u8; Self::RATE_BYTES];
+        blk_bytes[self.offset] = D;
+        blk_bytes[Self::RATE_BYTES - 1] ^= 0x80;
+
+        for i in 0..Self::RATE_WORDS {
+            let word = u64::from_le_bytes(blk_bytes[i * 8..(i + 1) * 8].try_into().unwrap());
+            self.state[i] ^= word;
+        }
+
+        keccak::permute(&mut self.state);
+
+        self.offset = 0;
+        self.is_ready = usize::MAX;
+        self.squeezable = Self::RATE_BYTES;
     }
 }
