@@ -92,7 +92,7 @@ fn rho(state: &mut [u64; 25]) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L192-L207
 ///
 /// Permutation table taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L37-L48
-fn pi(state: [u64; 25]) -> [u64; 25] {
+fn pi(state: &[u64; 25]) -> [u64; 25] {
     const PERM: [usize; 25] = [
         0, 6, 12, 18, 24, 3, 9, 10, 16, 22, 1, 7, 13, 19, 20, 4, 5, 11, 17, 23, 2, 8, 14, 15, 21,
     ];
@@ -108,7 +108,7 @@ fn pi(state: [u64; 25]) -> [u64; 25] {
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L209-L227
-fn chi(state: [u64; 25]) -> [u64; 25] {
+fn chi(state: &[u64; 25]) -> [u64; 25] {
     (0..5)
         .map(|y| {
             let off = y * 5;
@@ -161,4 +161,17 @@ fn iota(state: &mut [u64; 25], ridx: u32) {
         9223372039002292232,
     ];
     state[0] ^= RC[ridx as usize];
+}
+
+/// Keccak-p\[1600, 12\] round function, which applies all five
+/// step mapping functions in order, mutating state array, following
+/// section 3.3 of https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L237-L251
+fn round(state: &mut [u64; 25], ridx: u32) {
+    theta(state);
+    rho(state);
+    *state = pi(state);
+    *state = chi(state);
+    iota(state, ridx);
 }
