@@ -89,3 +89,24 @@ fn pi(state: [u64; 25]) -> [u64; 25] {
         .try_into()
         .unwrap()
 }
+
+/// Keccak-p\[1600, 12\] step mapping function χ, see section 3.2.4 of SHA3
+/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L209-L227
+fn chi(state: [u64; 25]) -> [u64; 25] {
+    (0..5)
+        .map(|y| {
+            let off = y * 5;
+            (0..5).map(move |x| {
+                let x1 = (x + 1) % 5;
+                let x2 = (x + 2) % 5;
+
+                state[off + x] ^ (!state[off + x1] & state[off + x2])
+            })
+        })
+        .flatten()
+        .collect::<Vec<u64>>()
+        .try_into()
+        .unwrap()
+}
