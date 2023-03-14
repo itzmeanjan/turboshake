@@ -8,6 +8,7 @@ use std::cmp;
 /// - c i.e. capacity can be either of 256 or 512 -bits.
 /// - Rate portion will have bitwidth of 1600 - c.
 /// - `offset` will live in 0 <= offset < RATE_BYTES.
+#[inline(always)]
 pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
     state: &mut [u64; 25],
     offset: &mut usize,
@@ -68,6 +69,7 @@ pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
 /// - c i.e. capacity can be either of 256 or 512 -bits.
 /// - Rate portion will have bitwidth of 1600 - c.
 /// - `offset` will live in 0 <= offset < RATE_BYTES.
+#[inline(always)]
 pub fn finalize<const RATE_BYTES: usize, const RATE_WORDS: usize, const D: u8>(
     state: &mut [u64; 25],
     offset: &mut usize,
@@ -92,6 +94,7 @@ pub fn finalize<const RATE_BYTES: usize, const RATE_WORDS: usize, const D: u8>(
 /// - Rate portion will have bitwidth of 1600 - c.
 /// - `readable` denotes how many bytes can be squeezed without permutating the sponge state.
 /// - When `readable` becomes 0, state needs to be permutated again, after which RATE_BYTES can be squeezed.
+#[inline(always)]
 pub fn squeeze<const RATE_BYTES: usize, const RATE_WORDS: usize>(
     state: &mut [u64; 25],
     readable: &mut usize,
