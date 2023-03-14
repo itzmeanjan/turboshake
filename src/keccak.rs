@@ -75,12 +75,11 @@ fn theta(state: &mut [u64; 25]) {
 
     let mut d = [0u64; 5];
 
-    for i in 0..5 {
-        let pidx = (i + 4) % 5;
-        let nidx = (i + 1) % 5;
-
-        d[i] = c[pidx] ^ c[nidx].rotate_left(1);
-    }
+    d[0] = c[4] ^ c[1].rotate_left(1);
+    d[1] = c[0] ^ c[2].rotate_left(1);
+    d[2] = c[1] ^ c[3].rotate_left(1);
+    d[3] = c[2] ^ c[4].rotate_left(1);
+    d[4] = c[3] ^ c[0].rotate_left(1);
 
     for i in (0..25).step_by(5) {
         state[i + 0] ^= d[0];
@@ -121,12 +120,12 @@ fn pi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
 fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
     for y in 0..5 {
         let off = y * 5;
-        for x in 0..5 {
-            let x1 = (x + 1) % 5;
-            let x2 = (x + 2) % 5;
 
-            ostate[off + x] = istate[off + x] ^ (!istate[off + x1] & istate[off + x2]);
-        }
+        ostate[off + 0] = istate[off + 0] ^ (!istate[off + 1] & istate[off + 2]);
+        ostate[off + 1] = istate[off + 1] ^ (!istate[off + 2] & istate[off + 3]);
+        ostate[off + 2] = istate[off + 2] ^ (!istate[off + 3] & istate[off + 4]);
+        ostate[off + 3] = istate[off + 3] ^ (!istate[off + 4] & istate[off + 0]);
+        ostate[off + 4] = istate[off + 4] ^ (!istate[off + 0] & istate[off + 1]);
     }
 }
 
