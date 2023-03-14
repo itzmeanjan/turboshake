@@ -7,11 +7,55 @@ const W: u32 = 1 << L;
 /// \# -of rounds of Keccak permutation is applied per iteration
 const ROUNDS: u32 = 12;
 
-/// Starting index of Keccak permutation round
-const SIDX: u32 = 12 + 2 * L - ROUNDS;
+/// Lane rotation factor table taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L25-L35
+const ROT: [u32; 25] = [
+    0 % W,
+    1 % W,
+    190 % W,
+    28 % W,
+    91 % W,
+    36 % W,
+    300 % W,
+    6 % W,
+    55 % W,
+    276 % W,
+    3 % W,
+    10 % W,
+    171 % W,
+    153 % W,
+    231 % W,
+    105 % W,
+    45 % W,
+    15 % W,
+    21 % W,
+    136 % W,
+    210 % W,
+    66 % W,
+    253 % W,
+    120 % W,
+    78 % W,
+];
 
-/// End index of Keccak permutation round
-const EIDX: u32 = 12 + 2 * L - 1;
+/// Permutation table taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L37-L48
+const PERM: [usize; 25] = [
+    0, 6, 12, 18, 24, 3, 9, 10, 16, 22, 1, 7, 13, 19, 20, 4, 5, 11, 17, 23, 2, 8, 14, 15, 21,
+];
+
+/// Round constants taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L134-L141
+const RC: [u64; ROUNDS as usize] = [
+    2147516555,
+    9223372036854775947,
+    9223372036854808713,
+    9223372036854808579,
+    9223372036854808578,
+    9223372036854775936,
+    32778,
+    9223372039002259466,
+    9223372039002292353,
+    9223372036854808704,
+    2147483649,
+    9223372039002292232,
+];
 
 /// Keccak-p\[1600, 12\] step mapping function θ, see section 3.2.1 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
@@ -51,38 +95,8 @@ fn theta(state: &mut [u64; 25]) {
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
-///
-/// Lane rotation factor table taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L25-L35
 #[inline(always)]
 fn rho(state: &mut [u64; 25]) {
-    const ROT: [u32; 25] = [
-        0 % W,
-        1 % W,
-        190 % W,
-        28 % W,
-        91 % W,
-        36 % W,
-        300 % W,
-        6 % W,
-        55 % W,
-        276 % W,
-        3 % W,
-        10 % W,
-        171 % W,
-        153 % W,
-        231 % W,
-        105 % W,
-        45 % W,
-        15 % W,
-        21 % W,
-        136 % W,
-        210 % W,
-        66 % W,
-        253 % W,
-        120 % W,
-        78 % W,
-    ];
-
     for i in 0..25 {
         state[i] = state[i].rotate_left(ROT[i]);
     }
@@ -92,14 +106,8 @@ fn rho(state: &mut [u64; 25]) {
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L192-L207
-///
-/// Permutation table taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L37-L48
 #[inline(always)]
 fn pi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
-    const PERM: [usize; 25] = [
-        0, 6, 12, 18, 24, 3, 9, 10, 16, 22, 1, 7, 13, 19, 20, 4, 5, 11, 17, 23, 2, 8, 14, 15, 21,
-    ];
-
     for i in 0..25 {
         ostate[i] = istate[PERM[i]];
     }
@@ -126,38 +134,8 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
-///
-/// Round constants taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L134-L141
 #[inline(always)]
 fn iota(state: &mut [u64; 25], ridx: u32) {
-    debug_assert!(ridx >= SIDX && ridx <= EIDX);
-
-    const RC: [u64; 24] = [
-        1,
-        32898,
-        9223372036854808714,
-        9223372039002292224,
-        32907,
-        2147483649,
-        9223372039002292353,
-        9223372036854808585,
-        138,
-        136,
-        2147516425,
-        2147483658,
-        2147516555,
-        9223372036854775947,
-        9223372036854808713,
-        9223372036854808579,
-        9223372036854808578,
-        9223372036854775936,
-        32778,
-        9223372039002259466,
-        9223372039002292353,
-        9223372036854808704,
-        2147483649,
-        9223372039002292232,
-    ];
     state[0] ^= RC[ridx as usize];
 }
 
@@ -184,5 +162,5 @@ fn round(state: &mut [u64; 25], ridx: u32) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L253-L493
 #[inline(always)]
 pub fn permute(state: &mut [u64; 25]) {
-    (SIDX..(EIDX + 1)).for_each(|ridx| round(state, ridx));
+    (0..ROUNDS).for_each(|ridx| round(state, ridx));
 }
