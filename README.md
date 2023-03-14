@@ -3,7 +3,7 @@ TurboSHAKE: A Family of e**X**tendable **O**utput **F**unctions based on round r
 
 ## Overview
 
-TurboSHAKE is a family of extendable output functions (XOFs) powered by round-reduced ( i.e. 12 -rounds ) Keccak-p[1600, 12] permutation. Keccak-p[1600, 12] has previously been used in fast hashing algorithm KangarooTwelve ( more @ https://keccak.team/kangarootwelve.html ). Recently a formal specification, describing TurboSHAKE was released ( more @ https://ia.cr/2023/342 ) which generally exposes the underlying primitive of KangarooTwelve ( also known as **K12**, see https://blake12.org ) so that post-quantum public key cryptosystems benefit from it ( more @ https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/5HveEPBsbxY ).
+TurboSHAKE is a family of extendable output functions (XOFs) powered by round-reduced ( i.e. 12 -rounds ) Keccak-p[1600, 12] permutation. Keccak-p[1600, 12] has previously been used in fast hashing algorithm KangarooTwelve ( more @ https://keccak.team/kangarootwelve.html ). Recently a formal specification, describing TurboSHAKE was released ( more @ https://ia.cr/2023/342 ) which generally exposes the underlying primitive of KangarooTwelve ( also known as **K12**, see https://blake12.org ) so that post-quantum public key cryptosystems ( such as Kyber, Dilithium etc. - being standardized by NIST ) benefit from it ( more @ https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/5HveEPBsbxY ).
 
 Here I'm maintaining a Rust library which implements TurboSHAKE{128, 256} XOF s.t. one can absorb arbitrary many bytes into sponge state, finalize sponge and squeeze arbitrary many bytes out of sponge.
 
@@ -250,9 +250,7 @@ Using TurboSHAKE{128, 256} XOF API is fairly easy
 
 ```toml
 [dependencies]
-...
 turboshake = { git = "https://github.com/itzmeanjan/turboshake" }
-...
 ```
 
 2) Create a TurboSHAKE{128, 256} XOF object.
@@ -280,6 +278,10 @@ hasher.absorb(&msg[4..]);
 4) When all message bytes are consumed, finalize sponge state by calling `finalize()`.
 
 ```rust
+// Note, one needs to pass a domain seperator constant byte in finalization step.
+// You can use 0x1f ( i.e. default domain seperator value ) if you're not using
+// multiple instances of TurboSHAKE. Consider reading section 1 ( top of page 2 )
+// of TurboSHAKE specification https://eprint.iacr.org/2023/342.pdf.
 hasher.finalize::<{ turboshake::TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
 ```
 
