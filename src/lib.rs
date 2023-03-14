@@ -1,5 +1,6 @@
 pub mod keccak;
 mod sponge;
+mod tests;
 mod turboshake128;
 mod turboshake256;
 
