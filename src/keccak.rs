@@ -17,6 +17,7 @@ const EIDX: u32 = 12 + 2 * L - 1;
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L145-L175
+#[inline(always)]
 fn theta(state: &mut [u64; 25]) {
     let mut c = [0u64; 5];
 
@@ -52,6 +53,7 @@ fn theta(state: &mut [u64; 25]) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
 ///
 /// Lane rotation factor table taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L25-L35
+#[inline(always)]
 fn rho(state: &mut [u64; 25]) {
     const ROT: [u32; 25] = [
         0 % W,
@@ -92,6 +94,7 @@ fn rho(state: &mut [u64; 25]) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L192-L207
 ///
 /// Permutation table taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L37-L48
+#[inline(always)]
 fn pi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
     const PERM: [usize; 25] = [
         0, 6, 12, 18, 24, 3, 9, 10, 16, 22, 1, 7, 13, 19, 20, 4, 5, 11, 17, 23, 2, 8, 14, 15, 21,
@@ -106,6 +109,7 @@ fn pi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L209-L227
+#[inline(always)]
 fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
     for y in 0..5 {
         let off = y * 5;
@@ -124,6 +128,7 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
 ///
 /// Round constants taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L134-L141
+#[inline(always)]
 fn iota(state: &mut [u64; 25], ridx: u32) {
     debug_assert!(ridx >= SIDX && ridx <= EIDX);
 
@@ -161,6 +166,7 @@ fn iota(state: &mut [u64; 25], ridx: u32) {
 /// section 3.3 of https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L237-L251
+#[inline(always)]
 fn round(state: &mut [u64; 25], ridx: u32) {
     let mut _state = [0u64; 25];
 
@@ -176,6 +182,7 @@ fn round(state: &mut [u64; 25], ridx: u32) {
 /// in section 3.3 of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L253-L493
+#[inline(always)]
 pub fn permute(state: &mut [u64; 25]) {
     (SIDX..(EIDX + 1)).for_each(|ridx| round(state, ridx));
 }
