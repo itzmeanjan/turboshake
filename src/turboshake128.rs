@@ -1,4 +1,4 @@
-use crate::keccak;
+use crate::{keccak, sponge};
 use std::cmp;
 
 /// TurboSHAKE128 Extendable Output Function (XOF)
@@ -46,53 +46,11 @@ impl TurboShake128 {
             return;
         }
 
-        let mlen = msg.len();
-
-        let mut blk_bytes = [0u8; Self::RATE_BYTES];
-
-        let blk_cnt = (self.offset + mlen) / Self::RATE_BYTES;
-        let till = blk_cnt * Self::RATE_BYTES;
-        let mut moff = 0;
-
-        while moff < till {
-            let byte_cnt = Self::RATE_BYTES - self.offset;
-
-            blk_bytes.fill(0u8);
-            blk_bytes[self.offset..].copy_from_slice(&msg[moff..(moff + byte_cnt)]);
-
-            for i in 0..Self::RATE_WORDS {
-                let word = u64::from_le_bytes(blk_bytes[i * 8..(i + 1) * 8].try_into().unwrap());
-                self.state[i] ^= word;
-            }
-
-            moff += Self::RATE_BYTES - self.offset;
-            self.offset += Self::RATE_BYTES - self.offset;
-
-            keccak::permute(&mut self.state);
-            self.offset = 0;
-        }
-
-        let rm_bytes = mlen - moff;
-
-        let src_frm = moff;
-        let src_to = src_frm + rm_bytes;
-        let dst_frm = self.offset;
-        let dst_to = dst_frm + rm_bytes;
-
-        blk_bytes.fill(0u8);
-        blk_bytes[dst_frm..dst_to].copy_from_slice(&msg[src_frm..src_to]);
-
-        for i in 0..Self::RATE_WORDS {
-            let word = u64::from_le_bytes(blk_bytes[i * 8..(i + 1) * 8].try_into().unwrap());
-            self.state[i] ^= word;
-        }
-
-        self.offset += rm_bytes;
-
-        if self.offset == Self::RATE_BYTES {
-            keccak::permute(&mut self.state);
-            self.offset = 0;
-        }
+        sponge::absorb::<{ Self::RATE_BYTES }, { Self::RATE_WORDS }>(
+            &mut self.state,
+            &mut self.offset,
+            msg,
+        );
     }
 
     /// After consuming N -bytes ( by invoking absorb routine arbitrary many times,
