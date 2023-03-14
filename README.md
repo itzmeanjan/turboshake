@@ -9,7 +9,7 @@ Here I'm maintaining a Rust library which implements TurboSHAKE{128, 256} XOF s.
 
 ## Prerequisites
 
-- Rust stable toolchain; see https://rustup.rs for installation guide.
+Rust stable toolchain; see https://rustup.rs for installation guide.
 
 ```bash
 # When developing this library, I was using
@@ -19,7 +19,11 @@ rustc 1.68.0 (2c8cc3432 2023-03-06)
 
 ## Testing
 
-> **Warning** This library implementation doesn't *yet* claim its functional correctness because I've not found any **K**nown **A**nswer **T**ests for TurboSHAKE.
+For ensuring functional correctness of TurboSHAKE{128, 256} implementation, I use test vectors from section 4 ( on page 9 ) and Appendix A ( on page 17 ) of https://datatracker.ietf.org/doc/draft-irtf-cfrg-kangarootwelve. Issue following command to run test cases
+
+```bash
+cargo test --lib
+```
 
 ## Benchmarking
 
