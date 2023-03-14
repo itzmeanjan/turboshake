@@ -1,5 +1,5 @@
 use rand::{thread_rng, RngCore};
-use turboshake::turboshake128::TurboShake128;
+use turboshake::TurboShake128;
 
 fn main() {
     let mut rng = thread_rng();
