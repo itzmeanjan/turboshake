@@ -97,11 +97,13 @@ fn pi(state: &[u64; 25]) -> [u64; 25] {
         0, 6, 12, 18, 24, 3, 9, 10, 16, 22, 1, 7, 13, 19, 20, 4, 5, 11, 17, 23, 2, 8, 14, 15, 21,
     ];
 
-    (0..25)
-        .map(|idx| state[PERM[idx]])
-        .collect::<Vec<u64>>()
-        .try_into()
-        .unwrap()
+    let mut _state = [0u64; 25];
+
+    for i in 0..25 {
+        _state[i] = state[PERM[i]];
+    }
+
+    _state
 }
 
 /// Keccak-p\[1600, 12\] step mapping function χ, see section 3.2.4 of SHA3
