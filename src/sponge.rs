@@ -13,7 +13,6 @@ pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
     msg: &[u8],
 ) {
     let mlen = msg.len();
-
     let mut blk_bytes = [0u8; RATE_BYTES];
 
     let blk_cnt = (*offset + mlen) / RATE_BYTES;
@@ -59,4 +58,28 @@ pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
         keccak::permute(state);
         *offset = 0;
     }
+}
+
+/// Given that N -bytes are already consumed into Keccak\[c\] permutation state, this routine
+/// finalizes sponge state and makes it ready for squeezing, by appending padding bytes to input
+/// message s.t. total absorbed message byte length becomes multiple of RATE_BYTES.
+///
+/// - c i.e. capacity can be either of 256 or 512 -bits.
+/// - Rate portion will have bitwidth of 1600 - c.
+/// - offset will live in 0 <= offset < RATE_BYTES.
+pub fn finalize<const RATE_BYTES: usize, const RATE_WORDS: usize, const D: u8>(
+    state: &mut [u64; 25],
+    offset: &mut usize,
+) {
+    let mut blk_bytes = [0u8; RATE_BYTES];
+    blk_bytes[*offset] = D;
+    blk_bytes[RATE_BYTES - 1] ^= 0x80;
+
+    for i in 0..RATE_WORDS {
+        let word = u64::from_le_bytes(blk_bytes[i * 8..(i + 1) * 8].try_into().unwrap());
+        state[i] ^= word;
+    }
+
+    keccak::permute(state);
+    *offset = 0;
 }

@@ -66,25 +66,18 @@ impl TurboShake128 {
     ///
     /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/shake128.hpp#L132-L192
     pub fn finalize<const D: u8>(&mut self) {
+        // See top of page 2 of https://ia.cr/2023/342
+        debug_assert!(D >= 0x01 && D <= 0x7f);
+
         if self.is_ready == usize::MAX {
             return;
         }
 
-        // See top of page 2 of https://ia.cr/2023/342
-        debug_assert!(D >= 0x01 && D <= 0x7f);
+        sponge::finalize::<{ Self::RATE_BYTES }, { Self::RATE_WORDS }, { D }>(
+            &mut self.state,
+            &mut self.offset,
+        );
 
-        let mut blk_bytes = [0u8; Self::RATE_BYTES];
-        blk_bytes[self.offset] = D;
-        blk_bytes[Self::RATE_BYTES - 1] ^= 0x80;
-
-        for i in 0..Self::RATE_WORDS {
-            let word = u64::from_le_bytes(blk_bytes[i * 8..(i + 1) * 8].try_into().unwrap());
-            self.state[i] ^= word;
-        }
-
-        keccak::permute(&mut self.state);
-
-        self.offset = 0;
         self.is_ready = usize::MAX;
         self.squeezable = Self::RATE_BYTES;
     }
