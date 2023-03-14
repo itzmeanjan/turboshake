@@ -1,5 +1,5 @@
 use rand::{thread_rng, RngCore};
-use turboshake::TurboShake128;
+use turboshake::TurboShake256;
 
 fn main() {
     let mut rng = thread_rng();
@@ -11,10 +11,10 @@ fn main() {
     let dlen = 32;
     let mut dig = vec![0u8; dlen];
 
-    let mut hasher = TurboShake128::new();
+    let mut hasher = TurboShake256::new();
     hasher.absorb(&msg[..mlen / 2]);
     hasher.absorb(&msg[mlen / 2..]);
-    hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+    hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
     hasher.squeeze(&mut dig[..dlen / 2]);
     hasher.squeeze(&mut dig[dlen / 2..]);
 

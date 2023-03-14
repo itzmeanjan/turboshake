@@ -1,2 +1,7 @@
 pub mod keccak;
-pub mod turboshake128;
+mod sponge;
+mod turboshake128;
+mod turboshake256;
+
+pub use turboshake128::TurboShake128;
+pub use turboshake256::TurboShake256;
