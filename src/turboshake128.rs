@@ -1,5 +1,4 @@
-use crate::{keccak, sponge};
-use std::cmp;
+use crate::sponge;
 
 /// TurboSHAKE128 Extendable Output Function (XOF)
 ///
