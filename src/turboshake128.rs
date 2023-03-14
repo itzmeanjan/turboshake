@@ -98,27 +98,10 @@ impl TurboShake128 {
             return;
         }
 
-        let olen = out.len();
-        let mut rate = [0u8; Self::RATE_BYTES];
-        let mut off = 0;
-
-        while off < olen {
-            let read = cmp::min(self.squeezable, olen - off);
-            let soff = Self::RATE_BYTES - self.squeezable;
-
-            for i in 0..Self::RATE_WORDS {
-                rate[i * 8..(i + 1) * 8].copy_from_slice(&self.state[i].to_le_bytes());
-            }
-
-            out[off..(off + read)].copy_from_slice(&rate[soff..(soff + read)]);
-
-            self.squeezable -= read;
-            off += read;
-
-            if self.squeezable == 0 {
-                keccak::permute(&mut self.state);
-                self.squeezable = Self::RATE_BYTES;
-            }
-        }
+        sponge::squeeze::<{ Self::RATE_BYTES }, { Self::RATE_WORDS }>(
+            &mut self.state,
+            &mut self.squeezable,
+            out,
+        );
     }
 }
