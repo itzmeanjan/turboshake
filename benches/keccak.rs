@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, BatchSize, Criterion};
-use rand::{thread_rng, Rng};
-use turboshake::keccak;
+use rand::{thread_rng, Rng, RngCore};
+use turboshake::{keccak, turboshake128::TurboShake128};
 
 fn keccak(c: &mut Criterion) {
     let mut rng = thread_rng();
@@ -27,5 +27,23 @@ fn keccak(c: &mut Criterion) {
     });
 }
 
+fn turboshake128<const MLEN: usize, const DLEN: usize>(c: &mut Criterion) {
+    let mut rng = thread_rng();
+
+    c.bench_function(&format!("turboshake128/{}/{}", MLEN, DLEN), |bench| {
+        let mut msg = vec![0u8; MLEN];
+        let mut dig = vec![0u8; DLEN];
+        rng.fill_bytes(&mut msg);
+
+        bench.iter(|| {
+            let mut hasher = TurboShake128::new();
+            hasher.absorb(&msg);
+            hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+            hasher.squeeze(&mut dig);
+        });
+    });
+}
+
 criterion_group!(permutation, keccak);
-criterion_main!(permutation);
+criterion_group!(hashing, turboshake128<32, 32>, turboshake128<64, 32>, turboshake128<128, 32>, turboshake128<256, 32>, turboshake128<512, 32>, turboshake128<1024, 32>, turboshake128<2048, 32>, turboshake128<4096, 32>);
+criterion_main!(permutation, hashing);
