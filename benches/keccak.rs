@@ -30,18 +30,44 @@ fn keccak(c: &mut Criterion) {
 fn turboshake128<const MLEN: usize, const DLEN: usize>(c: &mut Criterion) {
     let mut rng = thread_rng();
 
-    c.bench_function(&format!("turboshake128/{}/{}", MLEN, DLEN), |bench| {
-        let mut msg = vec![0u8; MLEN];
-        let mut dig = vec![0u8; DLEN];
-        rng.fill_bytes(&mut msg);
+    c.bench_function(
+        &format!("turboshake128/{}/{} (cached)", MLEN, DLEN),
+        |bench| {
+            let mut msg = vec![0u8; MLEN];
+            let mut dig = vec![0u8; DLEN];
+            rng.fill_bytes(&mut msg);
 
-        bench.iter(|| {
-            let mut hasher = TurboShake128::new();
-            hasher.absorb(&msg);
-            hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
-            hasher.squeeze(&mut dig);
-        });
-    });
+            bench.iter(|| {
+                let mut hasher = TurboShake128::new();
+                hasher.absorb(black_box(&msg));
+                hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+                hasher.squeeze(black_box(&mut dig));
+            });
+        },
+    );
+
+    c.bench_function(
+        &format!("turboshake128/{}/{} (random)", MLEN, DLEN),
+        |bench| {
+            let mut dig = vec![0u8; DLEN];
+
+            bench.iter_batched(
+                || {
+                    let mut msg = vec![0u8; MLEN];
+                    rng.fill_bytes(&mut msg);
+
+                    msg
+                },
+                |msg| {
+                    let mut hasher = TurboShake128::new();
+                    hasher.absorb(black_box(&msg));
+                    hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+                    hasher.squeeze(black_box(&mut dig));
+                },
+                BatchSize::SmallInput,
+            );
+        },
+    );
 }
 
 criterion_group!(permutation, keccak);
