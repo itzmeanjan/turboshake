@@ -18,3 +18,7 @@ bench = false
 [[bench]]
 name = "keccak"
 harness = false
+
+[[bench]]
+name = "turboshake"
+harness = false
