@@ -12,6 +12,7 @@ keywords = ["cryptography", "keccak", "xof", "hashing", "turboshake"]
 categories = ["cryptography"]
 
 [dependencies]
+crunchy = "0.2.2"
 
 [dev-dependencies]
 rand = "0.8.5"

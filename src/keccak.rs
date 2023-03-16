@@ -1,14 +1,16 @@
+use crunchy::unroll;
+
 /// Logarithm base 2 of bit width of lane of Keccak-p\[1600, 12\] permutation
-const L: u32 = 6;
+const L: usize = 6;
 
 /// Bit width of each lane of Keccak-p\[1600, 12\] permutation
-const W: u32 = 1 << L;
+const W: usize = 1 << L;
 
-/// \# -of rounds of Keccak permutation is applied per iteration
-const ROUNDS: u32 = 12;
+/// \# -of rounds of Keccak permutation is applied per iteration i.e. it's Keccak-p\[1600, 12\]
+const ROUNDS: usize = 12;
 
 /// Lane rotation factor table taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L25-L35
-const ROT: [u32; 25] = [
+const ROT: [usize; 25] = [
     0 % W,
     1 % W,
     190 % W,
@@ -42,7 +44,7 @@ const PERM: [usize; 25] = [
 ];
 
 /// Round constants taken from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L134-L141
-const RC: [u64; ROUNDS as usize] = [
+const RC: [u64; ROUNDS] = [
     2147516555,
     9223372036854775947,
     9223372036854808713,
@@ -65,12 +67,14 @@ const RC: [u64; ROUNDS as usize] = [
 fn theta(state: &mut [u64; 25]) {
     let mut c = [0u64; 5];
 
-    for i in (0..25).step_by(5) {
-        c[0] ^= state[i + 0];
-        c[1] ^= state[i + 1];
-        c[2] ^= state[i + 2];
-        c[3] ^= state[i + 3];
-        c[4] ^= state[i + 4];
+    unroll! {
+        for i in (0..25).step_by(5) {
+            c[0] ^= state[i + 0];
+            c[1] ^= state[i + 1];
+            c[2] ^= state[i + 2];
+            c[3] ^= state[i + 3];
+            c[4] ^= state[i + 4];
+        }
     }
 
     let mut d = [0u64; 5];
@@ -81,12 +85,14 @@ fn theta(state: &mut [u64; 25]) {
     d[3] = c[2] ^ c[4].rotate_left(1);
     d[4] = c[3] ^ c[0].rotate_left(1);
 
-    for i in (0..25).step_by(5) {
-        state[i + 0] ^= d[0];
-        state[i + 1] ^= d[1];
-        state[i + 2] ^= d[2];
-        state[i + 3] ^= d[3];
-        state[i + 4] ^= d[4];
+    unroll! {
+        for i in (0..25).step_by(5) {
+            state[i + 0] ^= d[0];
+            state[i + 1] ^= d[1];
+            state[i + 2] ^= d[2];
+            state[i + 3] ^= d[3];
+            state[i + 4] ^= d[4];
+        }
     }
 }
 
@@ -96,8 +102,10 @@ fn theta(state: &mut [u64; 25]) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
 #[inline(always)]
 fn rho(state: &mut [u64; 25]) {
-    for i in 0..25 {
-        state[i] = state[i].rotate_left(ROT[i]);
+    unroll! {
+        for i in 0..25 {
+            state[i] = state[i].rotate_left(ROT[i] as u32);
+        }
     }
 }
 
@@ -107,8 +115,10 @@ fn rho(state: &mut [u64; 25]) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L192-L207
 #[inline(always)]
 fn pi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
-    for i in 0..25 {
-        ostate[i] = istate[PERM[i]];
+    unroll! {
+        for i in 0..25 {
+            ostate[i] = istate[PERM[i]];
+        }
     }
 }
 
@@ -134,8 +144,8 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
 #[inline(always)]
-fn iota(state: &mut [u64; 25], ridx: u32) {
-    state[0] ^= RC[ridx as usize];
+fn iota(state: &mut [u64; 25], ridx: usize) {
+    state[0] ^= RC[ridx];
 }
 
 /// Keccak-p\[1600, 12\] round function, which applies all five
@@ -144,7 +154,7 @@ fn iota(state: &mut [u64; 25], ridx: u32) {
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L237-L251
 #[inline(always)]
-fn round(state: &mut [u64; 25], ridx: u32) {
+fn round(state: &mut [u64; 25], ridx: usize) {
     let mut _state = [0u64; 25];
 
     theta(state);
@@ -161,5 +171,7 @@ fn round(state: &mut [u64; 25], ridx: u32) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L253-L493
 #[inline(always)]
 pub fn permute(state: &mut [u64; 25]) {
-    (0..ROUNDS).for_each(|ridx| round(state, ridx));
+    for i in 0..ROUNDS {
+        round(state, i);
+    }
 }
