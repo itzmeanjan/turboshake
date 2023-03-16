@@ -37,213 +37,205 @@ RUSTFLAGS="-C opt-level=3 -C target-cpu=native" cargo bench
 
 ```bash
 keccak-p[1600, 12] (cached)
-                        time:   [427.94 ns 430.33 ns 434.01 ns]
-Found 7 outliers among 100 measurements (7.00%)
-  5 (5.00%) high mild
-  2 (2.00%) high severe
+                        time:   [170.97 ns 171.45 ns 172.03 ns]
+Found 11 outliers among 100 measurements (11.00%)
+  6 (6.00%) high mild
+  5 (5.00%) high severe
 
 keccak-p[1600, 12] (random)
-                        time:   [433.15 ns 434.92 ns 436.68 ns]
-Found 4 outliers among 100 measurements (4.00%)
-  2 (2.00%) high mild
-  2 (2.00%) high severe
+                        time:   [186.23 ns 187.54 ns 188.88 ns]
+Found 8 outliers among 100 measurements (8.00%)
+  7 (7.00%) high mild
+  1 (1.00%) high severe
 
+     Running benches/turboshake.rs (target/release/deps/turboshake-ee40f9eb0651fba3)
 turboshake128/32/32 (cached)
-                        time:   [441.30 ns 442.46 ns 443.61 ns]
-Found 5 outliers among 100 measurements (5.00%)
-  2 (2.00%) high mild
-  3 (3.00%) high severe
-
-turboshake128/32/32 (random)
-                        time:   [475.92 ns 477.18 ns 478.58 ns]
-Found 10 outliers among 100 measurements (10.00%)
-  1 (1.00%) low severe
-  1 (1.00%) low mild
-  4 (4.00%) high mild
+                        time:   [193.60 ns 194.11 ns 194.67 ns]
+Found 9 outliers among 100 measurements (9.00%)
+  5 (5.00%) high mild
   4 (4.00%) high severe
 
+turboshake128/32/32 (random)
+                        time:   [226.03 ns 226.81 ns 227.69 ns]
+Found 7 outliers among 100 measurements (7.00%)
+  1 (1.00%) high mild
+  6 (6.00%) high severe
+
 turboshake128/64/32 (cached)
-                        time:   [441.37 ns 443.11 ns 445.58 ns]
-Found 16 outliers among 100 measurements (16.00%)
-  5 (5.00%) high mild
-  11 (11.00%) high severe
+                        time:   [194.15 ns 194.94 ns 195.99 ns]
+Found 12 outliers among 100 measurements (12.00%)
+  7 (7.00%) high mild
+  5 (5.00%) high severe
 
 turboshake128/64/32 (random)
-                        time:   [482.14 ns 483.80 ns 485.64 ns]
-Found 11 outliers among 100 measurements (11.00%)
-  8 (8.00%) high mild
+                        time:   [233.17 ns 234.13 ns 235.16 ns]
+Found 5 outliers among 100 measurements (5.00%)
+  2 (2.00%) high mild
   3 (3.00%) high severe
 
 turboshake128/128/32 (cached)
-                        time:   [441.00 ns 442.05 ns 443.19 ns]
-Found 9 outliers among 100 measurements (9.00%)
-  6 (6.00%) high mild
-  3 (3.00%) high severe
+                        time:   [195.02 ns 195.69 ns 196.41 ns]
+Found 4 outliers among 100 measurements (4.00%)
+  2 (2.00%) high mild
+  2 (2.00%) high severe
 
 turboshake128/128/32 (random)
-                        time:   [497.72 ns 499.75 ns 501.94 ns]
-Found 4 outliers among 100 measurements (4.00%)
-  1 (1.00%) high mild
-  3 (3.00%) high severe
+                        time:   [245.22 ns 246.58 ns 248.05 ns]
+Found 5 outliers among 100 measurements (5.00%)
+  4 (4.00%) high mild
+  1 (1.00%) high severe
 
 turboshake128/256/32 (cached)
-                        time:   [872.20 ns 874.26 ns 876.51 ns]
-Found 9 outliers among 100 measurements (9.00%)
-  4 (4.00%) high mild
+                        time:   [371.44 ns 372.54 ns 373.78 ns]
+Found 7 outliers among 100 measurements (7.00%)
+  2 (2.00%) high mild
   5 (5.00%) high severe
 
 turboshake128/256/32 (random)
-                        time:   [947.51 ns 951.61 ns 956.12 ns]
-Found 12 outliers among 100 measurements (12.00%)
-  7 (7.00%) high mild
+                        time:   [451.83 ns 454.02 ns 456.40 ns]
+Found 8 outliers among 100 measurements (8.00%)
+  3 (3.00%) high mild
   5 (5.00%) high severe
 
 turboshake128/512/32 (cached)
-                        time:   [1.7421 µs 1.7485 µs 1.7572 µs]
-Found 9 outliers among 100 measurements (9.00%)
-  3 (3.00%) high mild
-  6 (6.00%) high severe
+                        time:   [721.75 ns 724.00 ns 726.39 ns]
+Found 7 outliers among 100 measurements (7.00%)
+  4 (4.00%) high mild
+  3 (3.00%) high severe
 
 turboshake128/512/32 (random)
-                        time:   [1.9043 µs 1.9136 µs 1.9225 µs]
-Found 2 outliers among 100 measurements (2.00%)
-  2 (2.00%) high mild
+                        time:   [897.06 ns 909.89 ns 923.12 ns]
+Found 1 outliers among 100 measurements (1.00%)
+  1 (1.00%) high mild
 
 turboshake128/1024/32 (cached)
-                        time:   [3.0337 µs 3.0450 µs 3.0601 µs]
+                        time:   [1.2600 µs 1.2641 µs 1.2689 µs]
 Found 6 outliers among 100 measurements (6.00%)
-  1 (1.00%) high mild
-  5 (5.00%) high severe
+  4 (4.00%) high mild
+  2 (2.00%) high severe
 
 turboshake128/1024/32 (random)
-                        time:   [3.1385 µs 3.1516 µs 3.1665 µs]
-Found 17 outliers among 100 measurements (17.00%)
-  10 (10.00%) high mild
-  7 (7.00%) high severe
+                        time:   [1.3228 µs 1.3311 µs 1.3405 µs]
+Found 10 outliers among 100 measurements (10.00%)
+  5 (5.00%) high mild
+  5 (5.00%) high severe
 
 turboshake128/2048/32 (cached)
-                        time:   [5.6126 µs 5.6298 µs 5.6498 µs]
-Found 12 outliers among 100 measurements (12.00%)
-  8 (8.00%) high mild
+                        time:   [2.3093 µs 2.3156 µs 2.3222 µs]
+Found 6 outliers among 100 measurements (6.00%)
+  2 (2.00%) high mild
   4 (4.00%) high severe
 
 turboshake128/2048/32 (random)
-                        time:   [5.7591 µs 5.7773 µs 5.7966 µs]
+                        time:   [2.3835 µs 2.3930 µs 2.4032 µs]
+Found 12 outliers among 100 measurements (12.00%)
+  10 (10.00%) high mild
+  2 (2.00%) high severe
+
+turboshake128/4096/32 (cached)
+                        time:   [4.4126 µs 4.4259 µs 4.4407 µs]
+Found 8 outliers among 100 measurements (8.00%)
+  4 (4.00%) high mild
+  4 (4.00%) high severe
+
+turboshake128/4096/32 (random)
+                        time:   [4.4995 µs 4.5224 µs 4.5482 µs]
+Found 10 outliers among 100 measurements (10.00%)
+  8 (8.00%) high mild
+  2 (2.00%) high severe
+
+turboshake256/32/32 (cached)
+                        time:   [190.16 ns 190.61 ns 191.08 ns]
+Found 5 outliers among 100 measurements (5.00%)
+  4 (4.00%) high mild
+  1 (1.00%) high severe
+
+turboshake256/32/32 (random)
+                        time:   [222.62 ns 223.58 ns 224.62 ns]
+Found 7 outliers among 100 measurements (7.00%)
+  5 (5.00%) high mild
+  2 (2.00%) high severe
+
+turboshake256/64/32 (cached)
+                        time:   [189.81 ns 190.33 ns 190.94 ns]
 Found 9 outliers among 100 measurements (9.00%)
   7 (7.00%) high mild
   2 (2.00%) high severe
 
-turboshake128/4096/32 (cached)
-                        time:   [10.812 µs 10.860 µs 10.916 µs]
-Found 11 outliers among 100 measurements (11.00%)
-  5 (5.00%) high mild
-  6 (6.00%) high severe
-
-turboshake128/4096/32 (random)
-                        time:   [10.999 µs 11.034 µs 11.072 µs]
-Found 9 outliers among 100 measurements (9.00%)
-  5 (5.00%) high mild
-  4 (4.00%) high severe
-
-turboshake256/32/32 (cached)
-                        time:   [439.24 ns 440.66 ns 442.35 ns]
-Found 9 outliers among 100 measurements (9.00%)
-  6 (6.00%) high mild
-  3 (3.00%) high severe
-
-turboshake256/32/32 (random)
-                        time:   [477.80 ns 479.40 ns 481.34 ns]
-Found 10 outliers among 100 measurements (10.00%)
-  1 (1.00%) low mild
-  6 (6.00%) high mild
-  3 (3.00%) high severe
-
-turboshake256/64/32 (cached)
-                        time:   [438.45 ns 439.41 ns 440.40 ns]
-Found 6 outliers among 100 measurements (6.00%)
-  4 (4.00%) high mild
-  2 (2.00%) high severe
-
 turboshake256/64/32 (random)
-                        time:   [486.78 ns 489.88 ns 492.96 ns]
-Found 5 outliers among 100 measurements (5.00%)
+                        time:   [228.10 ns 228.91 ns 229.78 ns]
+Found 8 outliers among 100 measurements (8.00%)
   3 (3.00%) high mild
-  2 (2.00%) high severe
-
-turboshake256/128/32 (cached)
-                        time:   [440.13 ns 441.52 ns 443.06 ns]
-Found 5 outliers among 100 measurements (5.00%)
-  3 (3.00%) high mild
-  2 (2.00%) high severe
-
-turboshake256/128/32 (random)
-                        time:   [502.20 ns 506.00 ns 510.37 ns]
-Found 5 outliers among 100 measurements (5.00%)
-  3 (3.00%) high mild
-  2 (2.00%) high severe
-
-turboshake256/256/32 (cached)
-                        time:   [870.85 ns 872.62 ns 874.63 ns]
-Found 9 outliers among 100 measurements (9.00%)
-  6 (6.00%) high mild
-  3 (3.00%) high severe
-
-turboshake256/256/32 (random)
-                        time:   [960.29 ns 964.64 ns 969.34 ns]
-Found 7 outliers among 100 measurements (7.00%)
-  3 (3.00%) high mild
-  4 (4.00%) high severe
-
-turboshake256/512/32 (cached)
-                        time:   [1.7372 µs 1.7424 µs 1.7483 µs]
-Found 15 outliers among 100 measurements (15.00%)
-  1 (1.00%) low mild
-  8 (8.00%) high mild
-  6 (6.00%) high severe
-
-turboshake256/512/32 (random)
-                        time:   [2.5907 µs 2.8738 µs 3.1747 µs]
-Found 14 outliers among 100 measurements (14.00%)
-  8 (8.00%) high mild
-  6 (6.00%) high severe
-
-turboshake256/1024/32 (cached)
-                        time:   [3.6393 µs 3.6474 µs 3.6562 µs]
-Found 6 outliers among 100 measurements (6.00%)
-  1 (1.00%) low mild
-  3 (3.00%) high mild
-  2 (2.00%) high severe
-
-turboshake256/1024/32 (random)
-                        time:   [3.7930 µs 3.8016 µs 3.8115 µs]
-Found 16 outliers among 100 measurements (16.00%)
-  1 (1.00%) low severe
-  5 (5.00%) low mild
-  4 (4.00%) high mild
-  6 (6.00%) high severe
-
-turboshake256/2048/32 (cached)
-                        time:   [8.2066 µs 8.7717 µs 9.5178 µs]
-Found 13 outliers among 100 measurements (13.00%)
-  13 (13.00%) high mild
-
-turboshake256/2048/32 (random)
-                        time:   [7.0309 µs 7.0552 µs 7.0829 µs]
-Found 9 outliers among 100 measurements (9.00%)
-  3 (3.00%) high mild
-  6 (6.00%) high severe
-
-turboshake256/4096/32 (cached)
-                        time:   [13.300 µs 13.332 µs 13.369 µs]
-Found 10 outliers among 100 measurements (10.00%)
-  5 (5.00%) high mild
   5 (5.00%) high severe
 
-turboshake256/4096/32 (random)
-                        time:   [13.503 µs 13.567 µs 13.646 µs]
-Found 13 outliers among 100 measurements (13.00%)
+turboshake256/128/32 (cached)
+                        time:   [191.65 ns 192.49 ns 193.46 ns]
+Found 8 outliers among 100 measurements (8.00%)
+  7 (7.00%) high mild
+  1 (1.00%) high severe
+
+turboshake256/128/32 (random)
+                        time:   [239.42 ns 240.75 ns 242.17 ns]
+Found 5 outliers among 100 measurements (5.00%)
+  1 (1.00%) high mild
+  4 (4.00%) high severe
+
+turboshake256/256/32 (cached)
+                        time:   [364.12 ns 365.34 ns 366.67 ns]
+Found 9 outliers among 100 measurements (9.00%)
+  4 (4.00%) high mild
+  5 (5.00%) high severe
+
+turboshake256/256/32 (random)
+                        time:   [451.02 ns 453.37 ns 455.85 ns]
+Found 6 outliers among 100 measurements (6.00%)
+  4 (4.00%) high mild
+  2 (2.00%) high severe
+
+turboshake256/512/32 (cached)
+                        time:   [708.38 ns 712.26 ns 717.51 ns]
+Found 9 outliers among 100 measurements (9.00%)
+  4 (4.00%) high mild
+  5 (5.00%) high severe
+
+turboshake256/512/32 (random)
+                        time:   [873.98 ns 884.23 ns 894.00 ns]
+
+turboshake256/1024/32 (cached)
+                        time:   [1.3822 µs 1.3854 µs 1.3889 µs]
+Found 10 outliers among 100 measurements (10.00%)
   6 (6.00%) high mild
-  7 (7.00%) high severe
+  4 (4.00%) high severe
+
+turboshake256/1024/32 (random)
+                        time:   [1.5439 µs 1.5562 µs 1.5697 µs]
+Found 5 outliers among 100 measurements (5.00%)
+  4 (4.00%) high mild
+  1 (1.00%) high severe
+
+turboshake256/2048/32 (cached)
+                        time:   [2.8448 µs 2.8567 µs 2.8693 µs]
+Found 5 outliers among 100 measurements (5.00%)
+  2 (2.00%) high mild
+  3 (3.00%) high severe
+
+turboshake256/2048/32 (random)
+                        time:   [2.9912 µs 3.0048 µs 3.0190 µs]
+Found 8 outliers among 100 measurements (8.00%)
+  4 (4.00%) high mild
+  4 (4.00%) high severe
+
+turboshake256/4096/32 (cached)
+                        time:   [5.3825 µs 5.4103 µs 5.4438 µs]
+Found 8 outliers among 100 measurements (8.00%)
+  6 (6.00%) high mild
+  2 (2.00%) high severe
+
+turboshake256/4096/32 (random)
+                        time:   [5.5844 µs 5.6091 µs 5.6342 µs]
+Found 8 outliers among 100 measurements (8.00%)
+  6 (6.00%) high mild
+  2 (2.00%) high severe
 ```
 
 ## Usage
@@ -254,7 +246,10 @@ Using TurboSHAKE{128, 256} XOF API is fairly easy
 
 ```toml
 [dependencies]
+# either
 turboshake = { git = "https://github.com/itzmeanjan/turboshake" }
+# or
+turboshake = "0.1.1"
 ```
 
 2) Create a TurboSHAKE{128, 256} XOF object.
