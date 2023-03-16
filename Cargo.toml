@@ -1,6 +1,6 @@
 [package]
 name = "turboshake"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Anjan Roy <hello@itzmeanjan.in>"]
 description = "A family of extendable output functions based on keccak-p[1600, 12] permutation"
@@ -12,6 +12,7 @@ keywords = ["cryptography", "keccak", "xof", "hashing", "turboshake"]
 categories = ["cryptography"]
 
 [dependencies]
+crunchy = "0.2.2"
 
 [dev-dependencies]
 rand = "0.8.5"
