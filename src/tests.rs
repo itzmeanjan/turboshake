@@ -3,12 +3,14 @@ use std::cmp;
 
 /// Generates static byte pattern of length 251, following
 /// https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-09.html#name-test-vectors
+#[allow(dead_code)]
 fn pattern() -> [u8; 251] {
     (0..251).map(|i| i).collect::<Vec<u8>>().try_into().unwrap()
 }
 
 /// Generates bytearray of length n by repeating static byte pattern returned by `pattern()`,
 /// following https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-09.html#name-test-vectors
+#[allow(dead_code)]
 fn ptn(n: usize) -> Vec<u8> {
     let mut res = vec![0; n];
 
@@ -25,6 +27,7 @@ fn ptn(n: usize) -> Vec<u8> {
 /// Given a message M of length n -bytes, absorbs it into TurboSHAKE128 object, while
 /// finalizing it by using domain seperator constant D ( generic constant parameter )
 /// and returning TurboSHAKE128 object, ready to be squeezed.
+#[allow(dead_code)]
 fn turboshake128<const D: u8>(msg: &[u8]) -> TurboShake128 {
     let mut hasher = TurboShake128::new();
     hasher.absorb(msg);
@@ -35,6 +38,7 @@ fn turboshake128<const D: u8>(msg: &[u8]) -> TurboShake128 {
 /// Given a message M of length n -bytes, absorbs it into TurboSHAKE256 object, while
 /// finalizing it by using domain seperator constant D ( generic constant parameter )
 /// and returning TurboSHAKE256 object, ready to be squeezed.
+#[allow(dead_code)]
 fn turboshake256<const D: u8>(msg: &[u8]) -> TurboShake256 {
     let mut hasher = TurboShake256::new();
     hasher.absorb(msg);
