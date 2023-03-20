@@ -1,6 +1,6 @@
 [package]
 name = "turboshake"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["Anjan Roy <hello@itzmeanjan.in>"]
 description = "A family of extendable output functions based on keccak-p[1600, 12] permutation"
@@ -10,6 +10,9 @@ repository = "https://github.com/itzmeanjan/turboshake.git"
 license = "MIT"
 keywords = ["cryptography", "keccak", "xof", "hashing", "turboshake"]
 categories = ["cryptography"]
+
+[features]
+dev = []
 
 [dependencies]
 crunchy = "0.2.2"
@@ -25,6 +28,7 @@ bench = false
 [[bench]]
 name = "keccak"
 harness = false
+required-features = ["dev"]
 
 [[bench]]
 name = "turboshake"
