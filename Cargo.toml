@@ -11,6 +11,9 @@ license = "MIT"
 keywords = ["cryptography", "keccak", "xof", "hashing", "turboshake"]
 categories = ["cryptography"]
 
+[features]
+dev = []
+
 [dependencies]
 crunchy = "0.2.2"
 
@@ -25,6 +28,7 @@ bench = false
 [[bench]]
 name = "keccak"
 harness = false
+required-features = ["dev"]
 
 [[bench]]
 name = "turboshake"

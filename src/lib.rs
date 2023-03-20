@@ -1,5 +1,13 @@
+#[cfg(feature = "dev")]
 pub mod keccak;
+#[cfg(not(feature = "dev"))]
+mod keccak;
+
+#[cfg(feature = "dev")]
+pub mod sponge;
+#[cfg(not(feature = "dev"))]
 mod sponge;
+
 mod tests;
 mod turboshake128;
 mod turboshake256;
