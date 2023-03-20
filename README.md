@@ -1,5 +1,5 @@
 # turboshake
-TurboSHAKE: A Family of e**X**tendable **O**utput **F**unctions based on round reduced Keccak[1600] Permutation
+TurboSHAKE: A Family of e**X**tendable **O**utput **F**unctions based on round reduced ( 12 rounds ) Keccak[1600] Permutation
 
 ## Overview
 
@@ -30,7 +30,11 @@ cargo test --lib
 Issue following command for benchmarking round-reduced Keccak-p[1600, 12] permutation and TurboSHAKE{128, 256} XOF ( for various input sizes ). Note, squeezed output size ( from the XOF ) is kept constant at 32 -bytes.
 
 ```bash
+# if only interested in TurboSHAKE{128, 256} XOF
 RUSTFLAGS="-C opt-level=3 -C target-cpu=native" cargo bench
+
+# also benchmarks keccak-p[1600, 12]
+RUSTFLAGS="-C opt-level=3 -C target-cpu=native" cargo bench --features dev
 ```
 
 ### On **Intel(R) Core(TM) i5-8279U CPU @ 2.40GHz**
@@ -262,7 +266,9 @@ Using TurboSHAKE{128, 256} XOF API is fairly easy
 # either
 turboshake = { git = "https://github.com/itzmeanjan/turboshake" }
 # or
-turboshake = "0.1.2"
+turboshake = "0.1.3"
+# or if interested in using underlying keccak-p[1600, 12] and sponge (developer) API
+turboshake = { version = "0.1.3", features = "dev" }
 ```
 
 2) Create a TurboSHAKE{128, 256} XOF object.
