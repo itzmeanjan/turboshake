@@ -340,9 +340,7 @@ fn test_incremental_ts128_hashing(mlen: usize, dlen: usize) {
     hasher1.squeeze(&mut dig1);
 
     // finally compare if both of them arrive at same digest or not !
-    for i in 0..dlen {
-        assert_eq!(dig0[i], dig1[0]);
-    }
+    assert_eq!(hex::encode(dig0), hex::encode(dig1));
 }
 
 /// Test if both oneshot and incremental hashing API of TurboSHAKE256 produces same result for same input message.
@@ -387,7 +385,5 @@ fn test_incremental_ts256_hashing(mlen: usize, dlen: usize) {
     hasher1.squeeze(&mut dig1);
 
     // finally compare if both of them arrive at same digest or not !
-    for i in 0..dlen {
-        assert_eq!(dig0[i], dig1[0]);
-    }
+    assert_eq!(hex::encode(dig0), hex::encode(dig1));
 }
