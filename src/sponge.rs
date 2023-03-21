@@ -14,14 +14,12 @@ pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
     offset: &mut usize,
     msg: &[u8],
 ) {
-    let mlen = msg.len();
     let mut blk_bytes = [0u8; RATE_BYTES];
 
-    let blk_cnt = (*offset + mlen) / RATE_BYTES;
-    let till = blk_cnt * RATE_BYTES;
+    let blk_cnt = (*offset + msg.len()) / RATE_BYTES;
     let mut moff = 0;
 
-    while moff < till {
+    for _ in 0..blk_cnt {
         let byte_cnt = RATE_BYTES - *offset;
 
         blk_bytes.fill(0u8);
@@ -32,14 +30,14 @@ pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
             state[i] ^= word;
         }
 
-        moff += RATE_BYTES - *offset;
-        *offset += RATE_BYTES - *offset;
+        moff += byte_cnt;
+        *offset += byte_cnt;
 
         keccak::permute(state);
         *offset = 0;
     }
 
-    let rm_bytes = mlen - moff;
+    let rm_bytes = msg.len() - moff;
 
     let src_frm = moff;
     let src_to = src_frm + rm_bytes;

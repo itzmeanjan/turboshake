@@ -1,6 +1,6 @@
 [package]
 name = "turboshake"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["Anjan Roy <hello@itzmeanjan.in>"]
 description = "A family of extendable output functions based on keccak-p[1600, 12] permutation"
@@ -21,6 +21,7 @@ crunchy = "0.2.2"
 rand = "0.8.5"
 hex = "0.4.3"
 criterion = "0.4.0"
+test-case = "3.0.0"
 
 [lib]
 bench = false

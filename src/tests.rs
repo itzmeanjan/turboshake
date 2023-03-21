@@ -1,5 +1,9 @@
+#![cfg(test)]
+
 use crate::{TurboShake128, TurboShake256};
+use rand::{thread_rng, RngCore};
 use std::cmp;
+use test_case::test_case;
 
 /// Generates static byte pattern of length 251, following
 /// https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-09.html#name-test-vectors
@@ -292,4 +296,94 @@ fn test_turboshake256() {
         hex::encode(&out),
         "49b38a11204328440c4c40fdaee305629379936d7a31f9474c4f0fb062a2a427"
     );
+}
+
+/// Test if both oneshot and incremental hashing API of TurboSHAKE128 produces same result for same input message.
+///
+/// Adapated from https://github.com/itzmeanjan/ascon/blob/f9ce50dd23b89e073e1f8fe94318d694e9b6770e/include/test/test_incremental_hashing.hpp#L11-L56
+#[test_case(32, 32; "message length = 32B, digest length = 32B")]
+#[test_case(64, 64; "message length = 64B, digest length = 64B")]
+#[test_case(128, 128; "message length = 128B, digest length = 128B")]
+#[test_case(256, 256; "message length = 256B, digest length = 256B")]
+#[test_case(512, 512; "message length = 512B, digest length = 512B")]
+#[test_case(1024, 1024; "message length = 1024B, digest length = 1024B")]
+fn test_incremental_ts128_hashing(mlen: usize, dlen: usize) {
+    // generate random input bytes ( of length mlen )
+    let mut rng = thread_rng();
+    let mut msg = vec![0u8; mlen];
+    rng.fill_bytes(&mut msg);
+
+    // digest computed by oneshot hasher
+    let mut dig0 = vec![0u8; dlen];
+    // digest computed by incremental hasher
+    let mut dig1 = vec![0u8; dlen];
+
+    // oneshot hashing
+    let mut hasher0 = TurboShake128::new();
+    hasher0.absorb(&msg);
+    hasher0.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+    hasher0.squeeze(&mut dig0);
+
+    // incremental hashing
+    let mut hasher1 = TurboShake128::new();
+
+    let mut off = 0;
+    while off < mlen {
+        // because we don't want to be stuck in an infinite loop if msg[off] = 0 !
+        let elen = cmp::min(cmp::max(msg[off] as usize, 1), mlen - off);
+
+        hasher1.absorb(&msg[off..(off + elen)]);
+        off += elen;
+    }
+
+    hasher1.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+    hasher1.squeeze(&mut dig1);
+
+    // finally compare if both of them arrive at same digest or not !
+    assert_eq!(hex::encode(dig0), hex::encode(dig1));
+}
+
+/// Test if both oneshot and incremental hashing API of TurboSHAKE256 produces same result for same input message.
+///
+/// Adapated from https://github.com/itzmeanjan/ascon/blob/f9ce50dd23b89e073e1f8fe94318d694e9b6770e/include/test/test_incremental_hashing.hpp#L11-L56
+#[test_case(32, 32; "message length = 32B, digest length = 32B")]
+#[test_case(64, 64; "message length = 64B, digest length = 64B")]
+#[test_case(128, 128; "message length = 128B, digest length = 128B")]
+#[test_case(256, 256; "message length = 256B, digest length = 256B")]
+#[test_case(512, 512; "message length = 512B, digest length = 512B")]
+#[test_case(1024, 1024; "message length = 1024B, digest length = 1024B")]
+fn test_incremental_ts256_hashing(mlen: usize, dlen: usize) {
+    // generate random input bytes ( of length mlen )
+    let mut rng = thread_rng();
+    let mut msg = vec![0u8; mlen];
+    rng.fill_bytes(&mut msg);
+
+    // digest computed by oneshot hasher
+    let mut dig0 = vec![0u8; dlen];
+    // digest computed by incremental hasher
+    let mut dig1 = vec![0u8; dlen];
+
+    // oneshot hashing
+    let mut hasher0 = TurboShake256::new();
+    hasher0.absorb(&msg);
+    hasher0.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+    hasher0.squeeze(&mut dig0);
+
+    // incremental hashing
+    let mut hasher1 = TurboShake256::new();
+
+    let mut off = 0;
+    while off < mlen {
+        // because we don't want to be stuck in an infinite loop if msg[off] = 0 !
+        let elen = cmp::min(cmp::max(msg[off] as usize, 1), mlen - off);
+
+        hasher1.absorb(&msg[off..(off + elen)]);
+        off += elen;
+    }
+
+    hasher1.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+    hasher1.squeeze(&mut dig1);
+
+    // finally compare if both of them arrive at same digest or not !
+    assert_eq!(hex::encode(dig0), hex::encode(dig1));
 }
