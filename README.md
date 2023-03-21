@@ -266,9 +266,9 @@ Using TurboSHAKE{128, 256} XOF API is fairly easy
 # either
 turboshake = { git = "https://github.com/itzmeanjan/turboshake" }
 # or
-turboshake = "0.1.3"
+turboshake = "0.1.4"
 # or if interested in using underlying keccak-p[1600, 12] and sponge (developer) API
-turboshake = { version = "0.1.3", features = "dev" }
+turboshake = { version = "0.1.4", features = "dev" }
 ```
 
 2) Create a TurboSHAKE{128, 256} XOF object.
