@@ -286,6 +286,25 @@ fn chix2(istate: &[u64x2; 25], ostate: &mut [u64x2; 25]) {
     }
 }
 
+/// Keccak-p\[1600, 12\] step mapping function χ, parallelly applied on four Keccak-p\[1600\]
+/// states, represented using 256 -bit SIMD registers, following algorithm described on section
+/// 3.2.4 of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L209-L227
+#[cfg(feature = "simdx4")]
+#[inline(always)]
+fn chix4(istate: &[u64x4; 25], ostate: &mut [u64x4; 25]) {
+    for y in 0..5 {
+        let off = y * 5;
+
+        ostate[off + 0] = istate[off + 0] ^ (!istate[off + 1] & istate[off + 2]);
+        ostate[off + 1] = istate[off + 1] ^ (!istate[off + 2] & istate[off + 3]);
+        ostate[off + 2] = istate[off + 2] ^ (!istate[off + 3] & istate[off + 4]);
+        ostate[off + 3] = istate[off + 3] ^ (!istate[off + 4] & istate[off + 0]);
+        ostate[off + 4] = istate[off + 4] ^ (!istate[off + 0] & istate[off + 1]);
+    }
+}
+
 /// Keccak-p\[1600, 12\] step mapping function ι, see section 3.2.5 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
