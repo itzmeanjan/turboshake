@@ -103,6 +103,9 @@ fn theta(state: &mut [u64; 25]) {
 /// states, represented using 128 -bit vectors, following algorithm described on section 3.2.1
 /// of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
+/// Every lane is 128 -bit wide, holding two different Keccak-p\[1600\] lanes, each of
+/// width 64 -bits. Lanes are laid out on registers as shown below.
+///
 /// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
 ///
 /// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
@@ -167,6 +170,9 @@ fn rho(state: &mut [u64; 25]) {
 /// states, represented using 128 -bit vectors, following algorithm described on section 3.2.2 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
+/// Every lane is 128 -bit wide, holding two different Keccak-p\[1600\] lanes, each of
+/// width 64 -bits. Lanes are laid out on registers as shown below.
+///
 /// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
 ///
 /// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
@@ -226,6 +232,9 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
 /// states, represented using 128 -bit vectors, following algorithm described on section 3.2.4 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
+/// Every lane is 128 -bit wide, holding two different Keccak-p\[1600\] lanes, each of
+/// width 64 -bits. Lanes are laid out on registers as shown below.
+///
 /// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
 ///
 /// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
@@ -262,6 +271,9 @@ fn iota(state: &mut [u64; 25], ridx: usize) {
 /// states, represented using 128 -bit vectors, following algorithm described on section 3.2.5 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
+/// Every lane is 128 -bit wide, holding two different Keccak-p\[1600\] lanes, each of
+/// width 64 -bits. Lanes are laid out on registers as shown below.
+///
 /// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
 ///
 /// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
@@ -291,6 +303,37 @@ fn round(state: &mut [u64; 25], ridx: usize) {
     pi(state, &mut _state);
     chi(&_state, state);
     iota(state, ridx);
+}
+
+/// Keccak-p\[1600, 12\] round function, parallelly applied on two Keccak-p\[1600\]
+/// states, represented using 128 -bit vectors, applying all five step mapping functions
+/// in order, mutating state array, following algorithm described on section 3.3
+/// of https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Every lane is 128 -bit wide, holding two different Keccak-p\[1600\] lanes, each of
+/// width 64 -bits. Lanes are laid out on registers as shown below.
+///
+/// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
+///
+/// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
+///
+/// \[<-----------u64----------> || <-----------u64-------->\]
+///
+/// \[<-------------------------u64x2---------------------->\]
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L237-L251
+#[cfg(feature = "simd")]
+#[inline(always)]
+fn roundx2(state: &mut [u64x2; 25], ridx: usize) {
+    thetax2(state);
+    rhox2(state);
+
+    let zeros = u64x2::splat(0u64);
+    let mut _state = [zeros; 25];
+
+    pi(state, &mut _state);
+    chix2(&_state, state);
+    iotax2(state, ridx);
 }
 
 /// Keccak-p\[1600, 12\] permutation, applying 12 rounds of permutation
