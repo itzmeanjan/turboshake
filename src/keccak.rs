@@ -163,6 +163,32 @@ fn rho(state: &mut [u64; 25]) {
     }
 }
 
+/// Keccak-p\[1600, 12\] step mapping function ρ, parallelly applied on two Keccak-p\[1600\]
+/// states, represented using 128 -bit vectors, following algorithm described on section 3.2.2 of SHA3
+/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
+///
+/// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
+///
+/// \[<-----------u64----------> || <-----------u64-------->\]
+///
+/// \[<-------------------------u64x2---------------------->\]
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
+#[cfg(feature = "simd")]
+#[inline(always)]
+fn rhox2(state: &mut [u64x2; 25]) {
+    unroll! {
+        for i in 0..25 {
+            let shl = u64x2::splat(ROT[i] as u64);
+            let shr = u64x2::splat((64 - ROT[i]) as u64);
+
+            state[i] = (state[i] << shl) | (state[i] >> shr);
+        }
+    }
+}
+
 /// Keccak-p\[1600, 12\] step mapping function π, see section 3.2.3 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
