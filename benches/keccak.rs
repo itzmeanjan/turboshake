@@ -2,7 +2,7 @@ use criterion::{black_box, criterion_group, criterion_main, BatchSize, Criterion
 use rand::{thread_rng, Rng};
 use turboshake::keccak;
 
-#[cfg(not(feature = "simd"))]
+#[cfg(not(feature = "simdx2"))]
 fn keccak(c: &mut Criterion) {
     let mut rng = thread_rng();
 
@@ -32,7 +32,7 @@ fn keccak(c: &mut Criterion) {
     group.finish();
 }
 
-#[cfg(feature = "simd")]
+#[cfg(feature = "simdx2")]
 fn keccak(c: &mut Criterion) {
     let mut rng = thread_rng();
 

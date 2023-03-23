@@ -13,7 +13,7 @@ categories = ["cryptography"]
 
 [features]
 dev = []
-simd = []
+simdx2 = []
 
 [dependencies]
 crunchy = "0.2.2"

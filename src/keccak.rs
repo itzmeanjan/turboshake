@@ -1,6 +1,6 @@
 use crunchy::unroll;
 
-#[cfg(feature = "simd")]
+#[cfg(feature = "simdx2")]
 use std::simd::u64x2;
 
 /// Logarithm base 2 of bit width of lane of Keccak-p\[1600, 12\] permutation
@@ -104,7 +104,7 @@ fn theta(state: &mut [u64; 25]) {
 /// of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L145-L175
-#[cfg(feature = "simd")]
+#[cfg(feature = "simdx2")]
 #[inline(always)]
 fn thetax2(state: &mut [u64x2; 25]) {
     let zeros = u64x2::splat(0u64);
@@ -160,7 +160,7 @@ fn rho(state: &mut [u64; 25]) {
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
-#[cfg(feature = "simd")]
+#[cfg(feature = "simdx2")]
 #[inline(always)]
 fn rhox2(state: &mut [u64x2; 25]) {
     unroll! {
@@ -211,7 +211,7 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L209-L227
-#[cfg(feature = "simd")]
+#[cfg(feature = "simdx2")]
 #[inline(always)]
 fn chix2(istate: &[u64x2; 25], ostate: &mut [u64x2; 25]) {
     for y in 0..5 {
@@ -239,7 +239,7 @@ fn iota(state: &mut [u64; 25], ridx: usize) {
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
-#[cfg(feature = "simd")]
+#[cfg(feature = "simdx2")]
 #[inline(always)]
 fn iotax2(state: &mut [u64x2; 25], ridx: usize) {
     state[0] ^= u64x2::splat(RC[ridx]);
@@ -267,7 +267,7 @@ fn round(state: &mut [u64; 25], ridx: usize) {
 /// of https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L237-L251
-#[cfg(feature = "simd")]
+#[cfg(feature = "simdx2")]
 #[inline(always)]
 fn roundx2(state: &mut [u64x2; 25], ridx: usize) {
     thetax2(state);
@@ -310,7 +310,7 @@ pub fn permute(state: &mut [u64; 25]) {
 /// \[<-------------------------u64x2---------------------->\]
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L253-L493
-#[cfg(feature = "simd")]
+#[cfg(feature = "simdx2")]
 #[inline(always)]
 pub fn permutex2(state0: &mut [u64; 25], state1: &mut [u64; 25]) {
     let zeros = u64x2::splat(0u64);

@@ -7,7 +7,7 @@ use test_case::test_case;
 
 /// Ensure functional correctness of Keccak-p\[1600, 12\] permutation's 2x
 /// SIMD parallel implementation.
-#[cfg(feature = "simd")]
+#[cfg(feature = "simdx2")]
 #[test]
 fn test_keccakx2() {
     use rand::Rng;
