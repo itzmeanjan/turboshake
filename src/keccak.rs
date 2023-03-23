@@ -2,6 +2,8 @@ use crunchy::unroll;
 
 #[cfg(feature = "simdx2")]
 use std::simd::u64x2;
+#[cfg(feature = "simdx4")]
+use std::simd::u64x4;
 
 /// Logarithm base 2 of bit width of lane of Keccak-p\[1600, 12\] permutation
 const L: usize = 6;
@@ -108,9 +110,6 @@ fn theta(state: &mut [u64; 25]) {
 #[inline(always)]
 fn thetax2(state: &mut [u64x2; 25]) {
     let zeros = u64x2::splat(0u64);
-    let ones = u64x2::splat(1u64);
-    let sixtythrees = u64x2::splat(63u64);
-
     let mut c = [zeros; 5];
 
     unroll! {
@@ -123,6 +122,8 @@ fn thetax2(state: &mut [u64x2; 25]) {
         }
     }
 
+    let ones = u64x2::splat(1u64);
+    let sixtythrees = u64x2::splat(63u64);
     let d = [
         c[4] ^ ((c[1] << ones) | (c[1] >> sixtythrees)),
         c[0] ^ ((c[2] << ones) | (c[2] >> sixtythrees)),
@@ -138,6 +139,48 @@ fn thetax2(state: &mut [u64x2; 25]) {
             state[i+2] ^= d[2];
             state[i+3] ^= d[3];
             state[i+4] ^= d[4];
+        }
+    }
+}
+
+/// Keccak-p\[1600, 12\] step mapping function θ, parallelly applied on four Keccak-p\[1600\]
+/// states, represented using 256 -bit SIMD registers, following algorithm described on section
+/// 3.2.1 of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L145-L175
+#[cfg(feature = "simdx4")]
+#[inline(always)]
+fn thetax4(state: &mut [u64x4; 25]) {
+    let zeros = u64x4::splat(0u64);
+    let mut c = [zeros; 5];
+
+    unroll! {
+        for i in (0..25).step_by(5) {
+            c[0] ^= state[i + 0];
+            c[1] ^= state[i + 1];
+            c[2] ^= state[i + 2];
+            c[3] ^= state[i + 3];
+            c[4] ^= state[i + 4];
+        }
+    }
+
+    let ones = u64x4::splat(1u64);
+    let sixtythrees = u64x4::splat(63u64);
+    let d = [
+        c[4] ^ ((c[1] << ones) | (c[1] >> sixtythrees)),
+        c[0] ^ ((c[2] << ones) | (c[2] >> sixtythrees)),
+        c[1] ^ ((c[3] << ones) | (c[3] >> sixtythrees)),
+        c[2] ^ ((c[4] << ones) | (c[4] >> sixtythrees)),
+        c[3] ^ ((c[0] << ones) | (c[0] >> sixtythrees)),
+    ];
+
+    unroll! {
+        for i in (0..25).step_by(5) {
+            state[i + 0] ^= d[0];
+            state[i + 1] ^= d[1];
+            state[i + 2] ^= d[2];
+            state[i + 3] ^= d[3];
+            state[i + 4] ^= d[4];
         }
     }
 }
