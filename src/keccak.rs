@@ -325,6 +325,17 @@ fn iotax2(state: &mut [u64x2; 25], ridx: usize) {
     state[0] ^= u64x2::splat(RC[ridx]);
 }
 
+/// Keccak-p\[1600, 12\] step mapping function ι, parallelly applied on four Keccak-p\[1600\]
+/// states, represented using 256 -bit SIMD registers, following algorithm described on section
+/// 3.2.5 of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
+#[cfg(feature = "simdx4")]
+#[inline(always)]
+fn iotax4(lane: u64x4, ridx: usize) -> u64x4 {
+    lane ^ u64x4::splat(RC[ridx])
+}
+
 /// Keccak-p\[1600, 12\] round function, which applies all five
 /// step mapping functions in order, mutating state array, following
 /// section 3.3 of https://dx.doi.org/10.6028/NIST.FIPS.202
