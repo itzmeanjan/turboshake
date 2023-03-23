@@ -222,6 +222,33 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
     }
 }
 
+/// Keccak-p\[1600, 12\] step mapping function χ, parallelly applied on two Keccak-p\[1600\]
+/// states, represented using 128 -bit vectors, following algorithm described on section 3.2.4 of SHA3
+/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
+///
+/// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
+///
+/// \[<-----------u64----------> || <-----------u64-------->\]
+///
+/// \[<-------------------------u64x2---------------------->\]
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L209-L227
+#[cfg(feature = "simd")]
+#[inline(always)]
+fn chix2(istate: &[u64x2; 25], ostate: &mut [u64x2; 25]) {
+    for y in 0..5 {
+        let off = y * 5;
+
+        ostate[off + 0] = istate[off + 0] ^ (!istate[off + 1] & istate[off + 2]);
+        ostate[off + 1] = istate[off + 1] ^ (!istate[off + 2] & istate[off + 3]);
+        ostate[off + 2] = istate[off + 2] ^ (!istate[off + 3] & istate[off + 4]);
+        ostate[off + 3] = istate[off + 3] ^ (!istate[off + 4] & istate[off + 0]);
+        ostate[off + 4] = istate[off + 4] ^ (!istate[off + 0] & istate[off + 1]);
+    }
+}
+
 /// Keccak-p\[1600, 12\] step mapping function ι, see section 3.2.5 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
