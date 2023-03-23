@@ -372,6 +372,26 @@ fn roundx2(state: &mut [u64x2; 25], ridx: usize) {
     iotax2(state, ridx);
 }
 
+/// Keccak-p\[1600, 12\] round function, parallelly applied on four Keccak-p\[1600\]
+/// states, represented using 256 -bit SIMD registers, applying all five step mapping
+/// functions in order, mutating state array, following algorithm described on section
+/// 3.3 of https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L237-L251
+#[cfg(feature = "simdx4")]
+#[inline(always)]
+fn roundx4(state: &mut [u64x4; 25], ridx: usize) {
+    thetax4(state);
+    rhox4(state);
+
+    let zeros = u64x4::splat(0u64);
+    let mut _state = [zeros; 25];
+
+    pi(state, &mut _state);
+    chix4(&_state, state);
+    state[0] = iotax4(state[0], ridx);
+}
+
 /// Keccak-p\[1600, 12\] permutation, applying 12 rounds of permutation
 /// on state of dimension 5 x 5 x 64 ( = 1600 -bits ), following algorithm 7 defined
 /// in section 3.3 of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
