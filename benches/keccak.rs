@@ -2,6 +2,7 @@ use criterion::{black_box, criterion_group, criterion_main, BatchSize, Criterion
 use rand::{thread_rng, Rng};
 use turboshake::keccak;
 
+#[cfg(not(feature = "simd"))]
 fn keccak(c: &mut Criterion) {
     let mut rng = thread_rng();
 
@@ -24,6 +25,39 @@ fn keccak(c: &mut Criterion) {
                     .unwrap()
             },
             |mut state| keccak::permute(black_box(&mut state)),
+            BatchSize::SmallInput,
+        )
+    });
+
+    group.finish();
+}
+
+#[cfg(feature = "simd")]
+fn keccak(c: &mut Criterion) {
+    let mut rng = thread_rng();
+
+    let mut group = c.benchmark_group("keccak");
+    group.throughput(Throughput::Bytes(400u64));
+
+    group.bench_function("keccak-p[1600, 12] x2 (cached)", |bench| {
+        let mut state0 = [0u64; 25];
+        let mut state1 = [0u64; 25];
+        rng.fill(&mut state0);
+        rng.fill(&mut state1);
+
+        bench.iter(|| keccak::permutex2(black_box(&mut state0), black_box(&mut state1)));
+    });
+    group.bench_function("keccak-p[1600, 12] x2 (random)", |bench| {
+        let mut state0 = [0u64; 25];
+        let mut state1 = [0u64; 25];
+        rng.fill(&mut state0);
+        rng.fill(&mut state1);
+
+        bench.iter_batched(
+            || (state0.clone(), state1.clone()),
+            |(mut state0, mut state1)| {
+                keccak::permutex2(black_box(&mut state0), black_box(&mut state1))
+            },
             BatchSize::SmallInput,
         )
     });
