@@ -347,3 +347,42 @@ pub fn permute(state: &mut [u64; 25]) {
         round(state, i);
     }
 }
+
+/// Keccak-p\[1600, 12\] permutation, applying 12 rounds of permutation, parallelly on
+/// two Keccak-p\[1600\] states, following algorithm 7 defined in section 3.3 of SHA3
+/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Every lane is 128 -bit wide ( instead of usual 64 -bits ), holding two different
+/// Keccak-p\[1600\] lanes, each of width 64 -bits. Each lane is laid out on a 128 -bit
+/// register as shown below.
+///
+/// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
+///
+/// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
+///
+/// \[<-----------u64----------> || <-----------u64-------->\]
+///
+/// \[<-------------------------u64x2---------------------->\]
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L253-L493
+#[cfg(feature = "simd")]
+#[inline(always)]
+pub fn permutex2(state0: &mut [u64; 25], state1: &mut [u64; 25]) {
+    let zeros = u64x2::splat(0u64);
+    let mut state = [zeros; 25];
+
+    for i in 0..25 {
+        let arr = [state0[i], state1[i]];
+        state[i] = u64x2::from_array(arr);
+    }
+
+    for i in 0..ROUNDS {
+        roundx2(&mut state, i);
+    }
+
+    for i in 0..25 {
+        let arr = state[i].to_array();
+        state0[i] = arr[0];
+        state1[i] = arr[1];
+    }
+}
