@@ -216,6 +216,24 @@ fn rhox2(state: &mut [u64x2; 25]) {
     }
 }
 
+/// Keccak-p\[1600, 12\] step mapping function ρ, parallelly applied on four Keccak-p\[1600\]
+/// states, represented using 256 -bit SIMD registers, following algorithm described on section
+/// 3.2.2 of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
+#[cfg(feature = "simdx4")]
+#[inline(always)]
+fn rhox4(state: &mut [u64x4; 25]) {
+    unroll! {
+        for i in 0..25 {
+            let shl = u64x4::splat(ROT[i] as u64);
+            let shr = u64x4::splat((64 - ROT[i]) as u64);
+
+            state[i] = (state[i] << shl) | (state[i] >> shr);
+        }
+    }
+}
+
 /// Keccak-p\[1600, 12\] step mapping function π, see section 3.2.3 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
