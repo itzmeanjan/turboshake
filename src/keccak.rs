@@ -194,7 +194,10 @@ fn rhox2(state: &mut [u64x2; 25]) {
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L192-L207
 #[inline(always)]
-fn pi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
+fn pi<T>(istate: &[T; 25], ostate: &mut [T; 25])
+where
+    T: Copy,
+{
     unroll! {
         for i in 0..25 {
             ostate[i] = istate[PERM[i]];
