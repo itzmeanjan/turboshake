@@ -103,17 +103,6 @@ fn theta(state: &mut [u64; 25]) {
 /// states, represented using 128 -bit vectors, following algorithm described on section 3.2.1
 /// of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
-/// Every lane is 128 -bit wide, holding two different Keccak-p\[1600\] lanes, each of
-/// width 64 -bits. Lanes are laid out on registers as shown below.
-///
-/// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
-///
-/// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
-///
-/// \[<-----------u64----------> || <-----------u64-------->\]
-///
-/// \[<-------------------------u64x2---------------------->\]
-///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L145-L175
 #[cfg(feature = "simd")]
 #[inline(always)]
@@ -170,17 +159,6 @@ fn rho(state: &mut [u64; 25]) {
 /// states, represented using 128 -bit vectors, following algorithm described on section 3.2.2 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
-/// Every lane is 128 -bit wide, holding two different Keccak-p\[1600\] lanes, each of
-/// width 64 -bits. Lanes are laid out on registers as shown below.
-///
-/// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
-///
-/// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
-///
-/// \[<-----------u64----------> || <-----------u64-------->\]
-///
-/// \[<-------------------------u64x2---------------------->\]
-///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
 #[cfg(feature = "simd")]
 #[inline(always)]
@@ -232,17 +210,6 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
 /// states, represented using 128 -bit vectors, following algorithm described on section 3.2.4 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
-/// Every lane is 128 -bit wide, holding two different Keccak-p\[1600\] lanes, each of
-/// width 64 -bits. Lanes are laid out on registers as shown below.
-///
-/// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
-///
-/// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
-///
-/// \[<-----------u64----------> || <-----------u64-------->\]
-///
-/// \[<-------------------------u64x2---------------------->\]
-///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L209-L227
 #[cfg(feature = "simd")]
 #[inline(always)]
@@ -271,17 +238,6 @@ fn iota(state: &mut [u64; 25], ridx: usize) {
 /// states, represented using 128 -bit vectors, following algorithm described on section 3.2.5 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
-/// Every lane is 128 -bit wide, holding two different Keccak-p\[1600\] lanes, each of
-/// width 64 -bits. Lanes are laid out on registers as shown below.
-///
-/// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
-///
-/// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
-///
-/// \[<-----------u64----------> || <-----------u64-------->\]
-///
-/// \[<-------------------------u64x2---------------------->\]
-///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
 #[cfg(feature = "simd")]
 #[inline(always)]
@@ -309,17 +265,6 @@ fn round(state: &mut [u64; 25], ridx: usize) {
 /// states, represented using 128 -bit vectors, applying all five step mapping functions
 /// in order, mutating state array, following algorithm described on section 3.3
 /// of https://dx.doi.org/10.6028/NIST.FIPS.202
-///
-/// Every lane is 128 -bit wide, holding two different Keccak-p\[1600\] lanes, each of
-/// width 64 -bits. Lanes are laid out on registers as shown below.
-///
-/// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
-///
-/// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
-///
-/// \[<-----------u64----------> || <-----------u64-------->\]
-///
-/// \[<-------------------------u64x2---------------------->\]
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L237-L251
 #[cfg(feature = "simd")]
