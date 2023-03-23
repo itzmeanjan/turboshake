@@ -5,6 +5,34 @@ use rand::{thread_rng, RngCore};
 use std::cmp;
 use test_case::test_case;
 
+/// Ensure functional correctness of Keccak-p\[1600, 12\] permutation's 2x
+/// SIMD parallel implementation.
+#[cfg(feature = "simd")]
+#[test]
+fn test_keccakx2() {
+    use rand::Rng;
+
+    use crate::keccak;
+
+    let mut rng = thread_rng();
+
+    let mut state0 = [0u64; 25];
+    let mut state1 = [0u64; 25];
+
+    rng.fill(&mut state0);
+    rng.fill(&mut state1);
+
+    let mut state0_copy = state0;
+    let mut state1_copy = state1;
+
+    keccak::permute(&mut state0);
+    keccak::permute(&mut state1);
+    keccak::permutex2(&mut state0_copy, &mut state1_copy);
+
+    assert_eq!(state0, state0_copy);
+    assert_eq!(state1, state1_copy);
+}
+
 /// Generates static byte pattern of length 251, following
 /// https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-09.html#name-test-vectors
 #[allow(dead_code)]
