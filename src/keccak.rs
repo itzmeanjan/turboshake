@@ -1,5 +1,8 @@
 use crunchy::unroll;
 
+#[cfg(feature = "simd")]
+use std::simd::u64x2;
+
 /// Logarithm base 2 of bit width of lane of Keccak-p\[1600, 12\] permutation
 const L: usize = 6;
 
@@ -96,6 +99,49 @@ fn theta(state: &mut [u64; 25]) {
     }
 }
 
+/// Keccak-p\[1600, 12\] step mapping function θ, parallelly applied on two Keccak-p\[1600\]
+/// states, represented using 128 -bit vectors, following algorithm described on section 3.2.1
+/// of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L145-L175
+#[cfg(feature = "simd")]
+#[inline(always)]
+fn thetax2(state: &mut [u64x2; 25]) {
+    let zeros = u64x2::splat(0u64);
+    let ones = u64x2::splat(1u64);
+    let sixtythrees = u64x2::splat(63u64);
+
+    let mut c = [zeros; 5];
+
+    unroll! {
+        for i in (0..25).step_by(5) {
+            c[0] ^= state[i + 0];
+            c[1] ^= state[i + 1];
+            c[2] ^= state[i + 2];
+            c[3] ^= state[i + 3];
+            c[4] ^= state[i + 4];
+        }
+    }
+
+    let d = [
+        c[4] ^ ((c[1] << ones) | (c[1] >> sixtythrees)),
+        c[0] ^ ((c[2] << ones) | (c[2] >> sixtythrees)),
+        c[1] ^ ((c[3] << ones) | (c[3] >> sixtythrees)),
+        c[2] ^ ((c[4] << ones) | (c[4] >> sixtythrees)),
+        c[3] ^ ((c[0] << ones) | (c[0] >> sixtythrees)),
+    ];
+
+    unroll! {
+        for i in (0..25).step_by(5) {
+            state[i+0] ^= d[0];
+            state[i+1] ^= d[1];
+            state[i+2] ^= d[2];
+            state[i+3] ^= d[3];
+            state[i+4] ^= d[4];
+        }
+    }
+}
+
 /// Keccak-p\[1600, 12\] step mapping function ρ, see section 3.2.2 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
@@ -109,12 +155,33 @@ fn rho(state: &mut [u64; 25]) {
     }
 }
 
+/// Keccak-p\[1600, 12\] step mapping function ρ, parallelly applied on two Keccak-p\[1600\]
+/// states, represented using 128 -bit vectors, following algorithm described on section 3.2.2 of SHA3
+/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
+#[cfg(feature = "simd")]
+#[inline(always)]
+fn rhox2(state: &mut [u64x2; 25]) {
+    unroll! {
+        for i in 0..25 {
+            let shl = u64x2::splat(ROT[i] as u64);
+            let shr = u64x2::splat((64 - ROT[i]) as u64);
+
+            state[i] = (state[i] << shl) | (state[i] >> shr);
+        }
+    }
+}
+
 /// Keccak-p\[1600, 12\] step mapping function π, see section 3.2.3 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L192-L207
 #[inline(always)]
-fn pi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
+fn pi<T>(istate: &[T; 25], ostate: &mut [T; 25])
+where
+    T: Copy,
+{
     unroll! {
         for i in 0..25 {
             ostate[i] = istate[PERM[i]];
@@ -139,6 +206,25 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
     }
 }
 
+/// Keccak-p\[1600, 12\] step mapping function χ, parallelly applied on two Keccak-p\[1600\]
+/// states, represented using 128 -bit vectors, following algorithm described on section 3.2.4 of SHA3
+/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L209-L227
+#[cfg(feature = "simd")]
+#[inline(always)]
+fn chix2(istate: &[u64x2; 25], ostate: &mut [u64x2; 25]) {
+    for y in 0..5 {
+        let off = y * 5;
+
+        ostate[off + 0] = istate[off + 0] ^ (!istate[off + 1] & istate[off + 2]);
+        ostate[off + 1] = istate[off + 1] ^ (!istate[off + 2] & istate[off + 3]);
+        ostate[off + 2] = istate[off + 2] ^ (!istate[off + 3] & istate[off + 4]);
+        ostate[off + 3] = istate[off + 3] ^ (!istate[off + 4] & istate[off + 0]);
+        ostate[off + 4] = istate[off + 4] ^ (!istate[off + 0] & istate[off + 1]);
+    }
+}
+
 /// Keccak-p\[1600, 12\] step mapping function ι, see section 3.2.5 of SHA3
 /// specification https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
@@ -146,6 +232,17 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
 #[inline(always)]
 fn iota(state: &mut [u64; 25], ridx: usize) {
     state[0] ^= RC[ridx];
+}
+
+/// Keccak-p\[1600, 12\] step mapping function ι, parallelly applied on two Keccak-p\[1600\]
+/// states, represented using 128 -bit vectors, following algorithm described on section 3.2.5 of SHA3
+/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
+#[cfg(feature = "simd")]
+#[inline(always)]
+fn iotax2(state: &mut [u64x2; 25], ridx: usize) {
+    state[0] ^= u64x2::splat(RC[ridx]);
 }
 
 /// Keccak-p\[1600, 12\] round function, which applies all five
@@ -164,6 +261,26 @@ fn round(state: &mut [u64; 25], ridx: usize) {
     iota(state, ridx);
 }
 
+/// Keccak-p\[1600, 12\] round function, parallelly applied on two Keccak-p\[1600\]
+/// states, represented using 128 -bit vectors, applying all five step mapping functions
+/// in order, mutating state array, following algorithm described on section 3.3
+/// of https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L237-L251
+#[cfg(feature = "simd")]
+#[inline(always)]
+fn roundx2(state: &mut [u64x2; 25], ridx: usize) {
+    thetax2(state);
+    rhox2(state);
+
+    let zeros = u64x2::splat(0u64);
+    let mut _state = [zeros; 25];
+
+    pi(state, &mut _state);
+    chix2(&_state, state);
+    iotax2(state, ridx);
+}
+
 /// Keccak-p\[1600, 12\] permutation, applying 12 rounds of permutation
 /// on state of dimension 5 x 5 x 64 ( = 1600 -bits ), following algorithm 7 defined
 /// in section 3.3 of SHA3 specification https://dx.doi.org/10.6028/NIST.FIPS.202
@@ -173,5 +290,44 @@ fn round(state: &mut [u64; 25], ridx: usize) {
 pub fn permute(state: &mut [u64; 25]) {
     for i in 0..ROUNDS {
         round(state, i);
+    }
+}
+
+/// Keccak-p\[1600, 12\] permutation, applying 12 rounds of permutation, parallelly on
+/// two Keccak-p\[1600\] states, following algorithm 7 defined in section 3.3 of SHA3
+/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
+///
+/// Every lane is 128 -bit wide ( instead of usual 64 -bits ), holding two different
+/// Keccak-p\[1600\] lanes, each of width 64 -bits. Each lane is laid out on a 128 -bit
+/// register as shown below.
+///
+/// \[127, 126, 125, ..., 65, 64 || 63, 62, ..., 3, 2, 1, 0\]
+///
+/// \[<--------state\[1\]--------> || <-------state\[0\]------->\]
+///
+/// \[<-----------u64----------> || <-----------u64-------->\]
+///
+/// \[<-------------------------u64x2---------------------->\]
+///
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L253-L493
+#[cfg(feature = "simd")]
+#[inline(always)]
+pub fn permutex2(state0: &mut [u64; 25], state1: &mut [u64; 25]) {
+    let zeros = u64x2::splat(0u64);
+    let mut state = [zeros; 25];
+
+    for i in 0..25 {
+        let arr = [state0[i], state1[i]];
+        state[i] = u64x2::from_array(arr);
+    }
+
+    for i in 0..ROUNDS {
+        roundx2(&mut state, i);
+    }
+
+    for i in 0..25 {
+        let arr = state[i].to_array();
+        state0[i] = arr[0];
+        state1[i] = arr[1];
     }
 }
