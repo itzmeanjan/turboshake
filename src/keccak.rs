@@ -321,8 +321,8 @@ fn iota(state: &mut [u64; 25], ridx: usize) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
 #[cfg(feature = "simdx2")]
 #[inline(always)]
-fn iotax2(state: &mut [u64x2; 25], ridx: usize) {
-    state[0] ^= u64x2::splat(RC[ridx]);
+fn iotax2(lane: u64x2, ridx: usize) -> u64x2 {
+    lane ^ u64x2::splat(RC[ridx])
 }
 
 /// Keccak-p\[1600, 12\] step mapping function ι, parallelly applied on four Keccak-p\[1600\]
@@ -369,7 +369,7 @@ fn roundx2(state: &mut [u64x2; 25], ridx: usize) {
 
     pi(state, &mut _state);
     chix2(&_state, state);
-    iotax2(state, ridx);
+    state[0] = iotax2(state[0], ridx);
 }
 
 /// Keccak-p\[1600, 12\] round function, parallelly applied on four Keccak-p\[1600\]
