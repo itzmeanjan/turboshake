@@ -40,3 +40,7 @@ harness = false
 [[example]]
 name = "keccak"
 required-features = ["dev"]
+
+[[example]]
+name = "simd_keccak"
+required-features = ["dev", "simdx4"]
