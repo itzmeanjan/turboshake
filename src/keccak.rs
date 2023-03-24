@@ -310,8 +310,8 @@ fn chix4(istate: &[u64x4; 25], ostate: &mut [u64x4; 25]) {
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
 #[inline(always)]
-fn iota(state: &mut [u64; 25], ridx: usize) {
-    state[0] ^= RC[ridx];
+fn iota(lane: u64, ridx: usize) -> u64 {
+    lane ^ RC[ridx]
 }
 
 /// Keccak-p\[1600, 12\] step mapping function ι, parallelly applied on two Keccak-p\[1600\]
@@ -349,7 +349,7 @@ fn round(state: &mut [u64; 25], ridx: usize) {
     rho(state);
     pi(state, &mut _state);
     chi(&_state, state);
-    iota(state, ridx);
+    state[0] = iota(state[0], ridx);
 }
 
 /// Keccak-p\[1600, 12\] round function, parallelly applied on two Keccak-p\[1600\]
