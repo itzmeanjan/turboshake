@@ -122,15 +122,15 @@ fn thetax2(state: &mut [u64x2; 25]) {
         }
     }
 
+    let mut d = [zeros; 5];
     let ones = u64x2::splat(1u64);
     let sixtythrees = u64x2::splat(63u64);
-    let d = [
-        c[4] ^ ((c[1] << ones) | (c[1] >> sixtythrees)),
-        c[0] ^ ((c[2] << ones) | (c[2] >> sixtythrees)),
-        c[1] ^ ((c[3] << ones) | (c[3] >> sixtythrees)),
-        c[2] ^ ((c[4] << ones) | (c[4] >> sixtythrees)),
-        c[3] ^ ((c[0] << ones) | (c[0] >> sixtythrees)),
-    ];
+
+    d[0] = c[4] ^ ((c[1] << ones) | (c[1] >> sixtythrees));
+    d[1] = c[0] ^ ((c[2] << ones) | (c[2] >> sixtythrees));
+    d[2] = c[1] ^ ((c[3] << ones) | (c[3] >> sixtythrees));
+    d[3] = c[2] ^ ((c[4] << ones) | (c[4] >> sixtythrees));
+    d[4] = c[3] ^ ((c[0] << ones) | (c[0] >> sixtythrees));
 
     unroll! {
         for i in (0..25).step_by(5) {
@@ -164,15 +164,15 @@ fn thetax4(state: &mut [u64x4; 25]) {
         }
     }
 
+    let mut d = [zeros; 5];
     let ones = u64x4::splat(1u64);
     let sixtythrees = u64x4::splat(63u64);
-    let d = [
-        c[4] ^ ((c[1] << ones) | (c[1] >> sixtythrees)),
-        c[0] ^ ((c[2] << ones) | (c[2] >> sixtythrees)),
-        c[1] ^ ((c[3] << ones) | (c[3] >> sixtythrees)),
-        c[2] ^ ((c[4] << ones) | (c[4] >> sixtythrees)),
-        c[3] ^ ((c[0] << ones) | (c[0] >> sixtythrees)),
-    ];
+
+    d[0] = c[4] ^ ((c[1] << ones) | (c[1] >> sixtythrees));
+    d[1] = c[0] ^ ((c[2] << ones) | (c[2] >> sixtythrees));
+    d[2] = c[1] ^ ((c[3] << ones) | (c[3] >> sixtythrees));
+    d[3] = c[2] ^ ((c[4] << ones) | (c[4] >> sixtythrees));
+    d[4] = c[3] ^ ((c[0] << ones) | (c[0] >> sixtythrees));
 
     unroll! {
         for i in (0..25).step_by(5) {
