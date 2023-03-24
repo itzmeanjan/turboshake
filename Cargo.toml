@@ -1,6 +1,6 @@
 [package]
 name = "turboshake"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 authors = ["Anjan Roy <hello@itzmeanjan.in>"]
 description = "A family of extendable output functions based on keccak-p[1600, 12] permutation"
@@ -13,7 +13,8 @@ categories = ["cryptography"]
 
 [features]
 dev = []
-simd = []
+simdx2 = []
+simdx4 = []
 
 [dependencies]
 crunchy = "0.2.2"
@@ -35,3 +36,11 @@ required-features = ["dev"]
 [[bench]]
 name = "turboshake"
 harness = false
+
+[[example]]
+name = "keccak"
+required-features = ["dev"]
+
+[[example]]
+name = "simd_keccak"
+required-features = ["dev", "simdx4"]

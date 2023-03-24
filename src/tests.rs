@@ -7,7 +7,7 @@ use test_case::test_case;
 
 /// Ensure functional correctness of Keccak-p\[1600, 12\] permutation's 2x
 /// SIMD parallel implementation.
-#[cfg(feature = "simd")]
+#[cfg(feature = "simdx2")]
 #[test]
 fn test_keccakx2() {
     use rand::Rng;
@@ -31,6 +31,49 @@ fn test_keccakx2() {
 
     assert_eq!(state0, state0_copy);
     assert_eq!(state1, state1_copy);
+}
+
+/// Ensure functional correctness of Keccak-p\[1600, 12\] permutation's 4x
+/// SIMD parallel implementation.
+#[cfg(feature = "simdx4")]
+#[test]
+fn test_keccakx4() {
+    use rand::Rng;
+
+    use crate::keccak;
+
+    let mut rng = thread_rng();
+
+    let mut state0 = [0u64; 25];
+    let mut state1 = [0u64; 25];
+    let mut state2 = [0u64; 25];
+    let mut state3 = [0u64; 25];
+
+    rng.fill(&mut state0);
+    rng.fill(&mut state1);
+    rng.fill(&mut state2);
+    rng.fill(&mut state3);
+
+    let mut state0_copy = state0;
+    let mut state1_copy = state1;
+    let mut state2_copy = state2;
+    let mut state3_copy = state3;
+
+    keccak::permute(&mut state0);
+    keccak::permute(&mut state1);
+    keccak::permute(&mut state2);
+    keccak::permute(&mut state3);
+    keccak::permutex4(
+        &mut state0_copy,
+        &mut state1_copy,
+        &mut state2_copy,
+        &mut state3_copy,
+    );
+
+    assert_eq!(state0, state0_copy);
+    assert_eq!(state1, state1_copy);
+    assert_eq!(state2, state2_copy);
+    assert_eq!(state3, state3_copy);
 }
 
 /// Generates static byte pattern of length 251, following
