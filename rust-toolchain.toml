@@ -1,3 +1,4 @@
 [toolchain]
 channel = "nightly"
+components = [ "rustc" ]
 profile = "minimal"
