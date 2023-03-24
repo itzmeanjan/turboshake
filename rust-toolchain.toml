@@ -1,4 +1,4 @@
 [toolchain]
 channel = "nightly"
-components = [ "rustc" ]
+components = [ "cargo", "rustc", "rust-std" ]
 profile = "minimal"
