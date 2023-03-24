@@ -17,4 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Run tests
-      run: cargo test --lib --features simd
+      run: RUSTFLAGS="-C opt-level=3 -C target-cpu=native" cargo test --lib --features simdx2,simdx4
+    - name: Run examples
+      run: cargo run --example turboshake128 && cargo run --example turboshake256
