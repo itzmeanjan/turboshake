@@ -53,11 +53,6 @@ pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
     }
 
     *offset += rm_bytes;
-
-    if *offset == RATE_BYTES {
-        keccak::permute(state);
-        *offset = 0;
-    }
 }
 
 /// Given that N message bytes are already consumed into Keccak\[c\] permutation state, this routine
