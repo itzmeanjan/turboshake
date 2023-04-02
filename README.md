@@ -320,14 +320,14 @@ Using TurboSHAKE{128, 256} XOF API is fairly easy
 # either
 turboshake = { git = "https://github.com/itzmeanjan/turboshake" }
 # or
-turboshake = "0.1.5"
+turboshake = "0.1.6"
 
 # If interested in using underlying keccak-p[1600, 12] permutation and sponge (developer) API
-turboshake = { version = "0.1.5", features = "dev" }
+turboshake = { version = "0.1.6", features = "dev" }
 # or if interested in using underlying 2x SIMD parallel keccak-p[1600, 12] permutation API
-turboshake = { version = "0.1.5", features = ["dev", "simdx2"] }
+turboshake = { version = "0.1.6", features = ["dev", "simdx2"] }
 # or if interested in using underlying 4x SIMD parallel keccak-p[1600, 12] permutation API
-turboshake = { version = "0.1.5", features = ["dev", "simdx4"] }
+turboshake = { version = "0.1.6", features = ["dev", "simdx4"] }
 ```
 
 2) Create a TurboSHAKE{128, 256} XOF object.
