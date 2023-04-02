@@ -57,205 +57,208 @@ RUSTFLAGS="-C opt-level=3 -C target-cpu=native" cargo bench keccak --features="d
 
 ```bash
 turboshake128/32/32 (cached)
-                        time:   [192.12 ns 192.64 ns 193.21 ns]
-                        thrpt:  [157.95 MiB/s 158.42 MiB/s 158.84 MiB/s]
+                        time:   [196.27 ns 196.96 ns 197.68 ns]
+                        thrpt:  [154.38 MiB/s 154.95 MiB/s 155.49 MiB/s]
 Found 3 outliers among 100 measurements (3.00%)
-  2 (2.00%) high mild
-  1 (1.00%) high severe
+  1 (1.00%) high mild
+  2 (2.00%) high severe
 turboshake128/32/32 (random)
-                        time:   [227.07 ns 227.96 ns 228.95 ns]
-                        thrpt:  [133.29 MiB/s 133.87 MiB/s 134.39 MiB/s]
+                        time:   [224.49 ns 226.95 ns 230.58 ns]
+                        thrpt:  [132.35 MiB/s 134.47 MiB/s 135.94 MiB/s]
 Found 8 outliers among 100 measurements (8.00%)
-  5 (5.00%) high mild
-  3 (3.00%) high severe
+  1 (1.00%) high mild
+  7 (7.00%) high severe
 
 turboshake128/64/32 (cached)
-                        time:   [189.56 ns 190.81 ns 192.51 ns]
-                        thrpt:  [317.06 MiB/s 319.87 MiB/s 321.98 MiB/s]
+                        time:   [194.85 ns 196.51 ns 198.65 ns]
+                        thrpt:  [307.25 MiB/s 310.59 MiB/s 313.25 MiB/s]
 Found 9 outliers among 100 measurements (9.00%)
-  5 (5.00%) high mild
-  4 (4.00%) high severe
+  4 (4.00%) high mild
+  5 (5.00%) high severe
 turboshake128/64/32 (random)
-                        time:   [234.05 ns 234.74 ns 235.48 ns]
-                        thrpt:  [259.19 MiB/s 260.01 MiB/s 260.78 MiB/s]
-Found 8 outliers among 100 measurements (8.00%)
-  3 (3.00%) high mild
+                        time:   [229.64 ns 230.75 ns 231.90 ns]
+                        thrpt:  [263.20 MiB/s 264.50 MiB/s 265.78 MiB/s]
+Found 11 outliers among 100 measurements (11.00%)
+  6 (6.00%) high mild
   5 (5.00%) high severe
 
 turboshake128/128/32 (cached)
-                        time:   [190.15 ns 190.85 ns 191.67 ns]
-                        thrpt:  [636.89 MiB/s 639.62 MiB/s 641.97 MiB/s]
-Found 9 outliers among 100 measurements (9.00%)
-  5 (5.00%) high mild
+                        time:   [193.21 ns 193.82 ns 194.47 ns]
+                        thrpt:  [627.72 MiB/s 629.81 MiB/s 631.80 MiB/s]
+Found 6 outliers among 100 measurements (6.00%)
+  2 (2.00%) high mild
   4 (4.00%) high severe
 turboshake128/128/32 (random)
-                        time:   [246.11 ns 247.20 ns 248.34 ns]
-                        thrpt:  [491.54 MiB/s 493.81 MiB/s 495.99 MiB/s]
-Found 6 outliers among 100 measurements (6.00%)
-  3 (3.00%) high mild
+                        time:   [239.42 ns 240.62 ns 241.83 ns]
+                        thrpt:  [504.78 MiB/s 507.31 MiB/s 509.87 MiB/s]
+Found 4 outliers among 100 measurements (4.00%)
+  1 (1.00%) high mild
   3 (3.00%) high severe
 
 turboshake128/256/32 (cached)
-                        time:   [362.72 ns 364.08 ns 365.60 ns]
-                        thrpt:  [667.79 MiB/s 670.58 MiB/s 673.09 MiB/s]
-Found 7 outliers among 100 measurements (7.00%)
-  2 (2.00%) high mild
-  5 (5.00%) high severe
-turboshake128/256/32 (random)
-                        time:   [453.01 ns 455.44 ns 458.20 ns]
-                        thrpt:  [532.82 MiB/s 536.06 MiB/s 538.93 MiB/s]
-Found 9 outliers among 100 measurements (9.00%)
-  5 (5.00%) high mild
-  4 (4.00%) high severe
-
-turboshake128/512/32 (cached)
-                        time:   [706.11 ns 708.11 ns 710.38 ns]
-                        thrpt:  [687.36 MiB/s 689.56 MiB/s 691.51 MiB/s]
-Found 6 outliers among 100 measurements (6.00%)
-  3 (3.00%) high mild
-  3 (3.00%) high severe
-turboshake128/512/32 (random)
-                        time:   [881.90 ns 892.06 ns 901.74 ns]
-                        thrpt:  [541.49 MiB/s 547.36 MiB/s 553.67 MiB/s]
-
-turboshake128/1024/32 (cached)
-                        time:   [1.2173 µs 1.2208 µs 1.2247 µs]
-                        thrpt:  [797.42 MiB/s 799.92 MiB/s 802.26 MiB/s]
-Found 7 outliers among 100 measurements (7.00%)
-  4 (4.00%) high mild
-  3 (3.00%) high severe
-turboshake128/1024/32 (random)
-                        time:   [1.3102 µs 1.3156 µs 1.3217 µs]
-                        thrpt:  [738.85 MiB/s 742.30 MiB/s 745.37 MiB/s]
-Found 11 outliers among 100 measurements (11.00%)
-  7 (7.00%) high mild
-  4 (4.00%) high severe
-
-turboshake128/2048/32 (cached)
-                        time:   [2.2567 µs 2.2672 µs 2.2816 µs]
-                        thrpt:  [856.05 MiB/s 861.48 MiB/s 865.50 MiB/s]
-Found 7 outliers among 100 measurements (7.00%)
-  2 (2.00%) high mild
-  5 (5.00%) high severe
-turboshake128/2048/32 (random)
-                        time:   [2.3796 µs 2.3922 µs 2.4080 µs]
-                        thrpt:  [811.09 MiB/s 816.47 MiB/s 820.79 MiB/s]
+                        time:   [357.85 ns 359.04 ns 360.64 ns]
+                        thrpt:  [676.97 MiB/s 679.97 MiB/s 682.25 MiB/s]
 Found 10 outliers among 100 measurements (10.00%)
   5 (5.00%) high mild
   5 (5.00%) high severe
+turboshake128/256/32 (random)
+                        time:   [453.21 ns 455.88 ns 458.74 ns]
+                        thrpt:  [532.19 MiB/s 535.53 MiB/s 538.70 MiB/s]
+Found 5 outliers among 100 measurements (5.00%)
+  5 (5.00%) high mild
+
+turboshake128/512/32 (cached)
+                        time:   [687.83 ns 689.47 ns 691.34 ns]
+                        thrpt:  [706.28 MiB/s 708.20 MiB/s 709.89 MiB/s]
+Found 12 outliers among 100 measurements (12.00%)
+  5 (5.00%) high mild
+  7 (7.00%) high severe
+turboshake128/512/32 (random)
+                        time:   [861.01 ns 871.25 ns 881.36 ns]
+                        thrpt:  [554.01 MiB/s 560.44 MiB/s 567.10 MiB/s]
+Found 1 outliers among 100 measurements (1.00%)
+  1 (1.00%) high mild
+
+turboshake128/1024/32 (cached)
+                        time:   [1.1853 µs 1.1886 µs 1.1922 µs]
+                        thrpt:  [819.13 MiB/s 821.59 MiB/s 823.88 MiB/s]
+Found 10 outliers among 100 measurements (10.00%)
+  5 (5.00%) high mild
+  5 (5.00%) high severe
+turboshake128/1024/32 (random)
+                        time:   [1.3049 µs 1.3127 µs 1.3203 µs]
+                        thrpt:  [739.65 MiB/s 743.95 MiB/s 748.39 MiB/s]
+Found 11 outliers among 100 measurements (11.00%)
+  4 (4.00%) high mild
+  7 (7.00%) high severe
+
+turboshake128/2048/32 (cached)
+                        time:   [2.1791 µs 2.1978 µs 2.2206 µs]
+                        thrpt:  [879.55 MiB/s 888.67 MiB/s 896.29 MiB/s]
+Found 10 outliers among 100 measurements (10.00%)
+  4 (4.00%) high mild
+  6 (6.00%) high severe
+turboshake128/2048/32 (random)
+                        time:   [2.3710 µs 2.3837 µs 2.3981 µs]
+                        thrpt:  [814.43 MiB/s 819.37 MiB/s 823.77 MiB/s]
+Found 6 outliers among 100 measurements (6.00%)
+  4 (4.00%) high mild
+  2 (2.00%) high severe
 
 turboshake128/4096/32 (cached)
-                        time:   [4.3059 µs 4.3170 µs 4.3297 µs]
-                        thrpt:  [902.19 MiB/s 904.86 MiB/s 907.19 MiB/s]
-Found 9 outliers among 100 measurements (9.00%)
-  7 (7.00%) high mild
-  2 (2.00%) high severe
+                        time:   [4.1462 µs 4.1579 µs 4.1706 µs]
+                        thrpt:  [936.61 MiB/s 939.47 MiB/s 942.12 MiB/s]
+Found 10 outliers among 100 measurements (10.00%)
+  6 (6.00%) high mild
+  4 (4.00%) high severe
 turboshake128/4096/32 (random)
-                        time:   [4.4958 µs 4.5177 µs 4.5417 µs]
-                        thrpt:  [860.08 MiB/s 864.65 MiB/s 868.87 MiB/s]
-Found 13 outliers among 100 measurements (13.00%)
-  7 (7.00%) high mild
-  6 (6.00%) high severe
+                        time:   [4.4655 µs 4.4910 µs 4.5200 µs]
+                        thrpt:  [864.21 MiB/s 869.80 MiB/s 874.76 MiB/s]
+Found 9 outliers among 100 measurements (9.00%)
+  5 (5.00%) high mild
+  4 (4.00%) high severe
 
 turboshake256/32/32 (cached)
-                        time:   [187.46 ns 187.87 ns 188.31 ns]
-                        thrpt:  [162.06 MiB/s 162.44 MiB/s 162.80 MiB/s]
-Found 9 outliers among 100 measurements (9.00%)
+                        time:   [185.13 ns 185.68 ns 186.31 ns]
+                        thrpt:  [163.80 MiB/s 164.35 MiB/s 164.84 MiB/s]
+Found 11 outliers among 100 measurements (11.00%)
   5 (5.00%) high mild
-  4 (4.00%) high severe
+  6 (6.00%) high severe
 turboshake256/32/32 (random)
-                        time:   [228.14 ns 230.18 ns 232.87 ns]
-                        thrpt:  [131.05 MiB/s 132.58 MiB/s 133.77 MiB/s]
-Found 9 outliers among 100 measurements (9.00%)
-  5 (5.00%) high mild
-  4 (4.00%) high severe
+                        time:   [225.98 ns 226.75 ns 227.59 ns]
+                        thrpt:  [134.09 MiB/s 134.59 MiB/s 135.04 MiB/s]
+Found 6 outliers among 100 measurements (6.00%)
+  1 (1.00%) high mild
+  5 (5.00%) high severe
 
 turboshake256/64/32 (cached)
-                        time:   [187.78 ns 188.37 ns 189.05 ns]
-                        thrpt:  [322.86 MiB/s 324.01 MiB/s 325.03 MiB/s]
-Found 12 outliers among 100 measurements (12.00%)
-  8 (8.00%) high mild
-  4 (4.00%) high severe
+                        time:   [185.37 ns 185.99 ns 186.82 ns]
+                        thrpt:  [326.70 MiB/s 328.16 MiB/s 329.26 MiB/s]
+Found 7 outliers among 100 measurements (7.00%)
+  4 (4.00%) high mild
+  3 (3.00%) high severe
 turboshake256/64/32 (random)
-                        time:   [233.33 ns 234.31 ns 235.39 ns]
-                        thrpt:  [259.30 MiB/s 260.49 MiB/s 261.58 MiB/s]
-Found 4 outliers among 100 measurements (4.00%)
-  2 (2.00%) high mild
-  2 (2.00%) high severe
+                        time:   [233.69 ns 234.75 ns 235.97 ns]
+                        thrpt:  [258.66 MiB/s 260.00 MiB/s 261.19 MiB/s]
+Found 11 outliers among 100 measurements (11.00%)
+  6 (6.00%) high mild
+  5 (5.00%) high severe
 
 turboshake256/128/32 (cached)
-                        time:   [188.01 ns 188.58 ns 189.24 ns]
-                        thrpt:  [645.06 MiB/s 647.31 MiB/s 649.27 MiB/s]
-Found 7 outliers among 100 measurements (7.00%)
-  7 (7.00%) high severe
+                        time:   [188.13 ns 188.91 ns 189.67 ns]
+                        thrpt:  [643.59 MiB/s 646.17 MiB/s 648.86 MiB/s]
+Found 2 outliers among 100 measurements (2.00%)
+  2 (2.00%) high mild
 turboshake256/128/32 (random)
-                        time:   [243.56 ns 245.10 ns 246.75 ns]
-                        thrpt:  [494.71 MiB/s 498.04 MiB/s 501.19 MiB/s]
+                        time:   [245.24 ns 246.77 ns 248.37 ns]
+                        thrpt:  [491.48 MiB/s 494.66 MiB/s 497.75 MiB/s]
 Found 8 outliers among 100 measurements (8.00%)
   5 (5.00%) high mild
   3 (3.00%) high severe
 
 turboshake256/256/32 (cached)
-                        time:   [364.29 ns 365.10 ns 366.00 ns]
-                        thrpt:  [667.05 MiB/s 668.69 MiB/s 670.18 MiB/s]
+                        time:   [350.73 ns 351.57 ns 352.51 ns]
+                        thrpt:  [692.59 MiB/s 694.42 MiB/s 696.10 MiB/s]
 Found 8 outliers among 100 measurements (8.00%)
-  4 (4.00%) high mild
-  4 (4.00%) high severe
-turboshake256/256/32 (random)
-                        time:   [461.17 ns 463.19 ns 465.35 ns]
-                        thrpt:  [524.64 MiB/s 527.08 MiB/s 529.40 MiB/s]
-Found 8 outliers among 100 measurements (8.00%)
-  6 (6.00%) high mild
-  2 (2.00%) high severe
-
-turboshake256/512/32 (cached)
-                        time:   [714.28 ns 716.45 ns 718.91 ns]
-                        thrpt:  [679.20 MiB/s 681.53 MiB/s 683.60 MiB/s]
-Found 11 outliers among 100 measurements (11.00%)
-  3 (3.00%) high mild
-  8 (8.00%) high severe
-turboshake256/512/32 (random)
-                        time:   [910.24 ns 920.89 ns 931.37 ns]
-                        thrpt:  [524.26 MiB/s 530.23 MiB/s 536.43 MiB/s]
-
-turboshake256/1024/32 (cached)
-                        time:   [1.4109 µs 1.4161 µs 1.4216 µs]
-                        thrpt:  [686.93 MiB/s 689.59 MiB/s 692.16 MiB/s]
-Found 6 outliers among 100 measurements (6.00%)
-  3 (3.00%) high mild
+  5 (5.00%) high mild
   3 (3.00%) high severe
-turboshake256/1024/32 (random)
-                        time:   [1.5463 µs 1.5528 µs 1.5600 µs]
-                        thrpt:  [626.02 MiB/s 628.89 MiB/s 631.57 MiB/s]
+turboshake256/256/32 (random)
+                        time:   [441.48 ns 442.86 ns 444.30 ns]
+                        thrpt:  [549.50 MiB/s 551.29 MiB/s 553.00 MiB/s]
 Found 5 outliers among 100 measurements (5.00%)
   4 (4.00%) high mild
   1 (1.00%) high severe
 
+turboshake256/512/32 (cached)
+                        time:   [679.69 ns 681.65 ns 683.80 ns]
+                        thrpt:  [714.07 MiB/s 716.32 MiB/s 718.39 MiB/s]
+Found 7 outliers among 100 measurements (7.00%)
+  4 (4.00%) high mild
+  3 (3.00%) high severe
+turboshake256/512/32 (random)
+                        time:   [858.58 ns 868.71 ns 878.49 ns]
+                        thrpt:  [555.82 MiB/s 562.08 MiB/s 568.71 MiB/s]
+Found 1 outliers among 100 measurements (1.00%)
+  1 (1.00%) high severe
+
+turboshake256/1024/32 (cached)
+                        time:   [1.3423 µs 1.3458 µs 1.3496 µs]
+                        thrpt:  [723.60 MiB/s 725.65 MiB/s 727.54 MiB/s]
+Found 4 outliers among 100 measurements (4.00%)
+  1 (1.00%) high mild
+  3 (3.00%) high severe
+turboshake256/1024/32 (random)
+                        time:   [1.4489 µs 1.4552 µs 1.4616 µs]
+                        thrpt:  [668.16 MiB/s 671.06 MiB/s 673.99 MiB/s]
+Found 3 outliers among 100 measurements (3.00%)
+  1 (1.00%) high mild
+  2 (2.00%) high severe
+
 turboshake256/2048/32 (cached)
-                        time:   [2.7985 µs 2.8059 µs 2.8143 µs]
-                        thrpt:  [694.01 MiB/s 696.07 MiB/s 697.92 MiB/s]
-Found 13 outliers among 100 measurements (13.00%)
-  8 (8.00%) high mild
-  5 (5.00%) high severe
+                        time:   [2.6615 µs 2.6675 µs 2.6743 µs]
+                        thrpt:  [730.34 MiB/s 732.19 MiB/s 733.85 MiB/s]
+Found 10 outliers among 100 measurements (10.00%)
+  7 (7.00%) high mild
+  3 (3.00%) high severe
 turboshake256/2048/32 (random)
-                        time:   [3.0009 µs 3.0131 µs 3.0270 µs]
-                        thrpt:  [645.23 MiB/s 648.21 MiB/s 650.85 MiB/s]
+                        time:   [2.8298 µs 2.8415 µs 2.8548 µs]
+                        thrpt:  [684.15 MiB/s 687.35 MiB/s 690.21 MiB/s]
 Found 13 outliers among 100 measurements (13.00%)
-  8 (8.00%) high mild
-  5 (5.00%) high severe
+  7 (7.00%) high mild
+  6 (6.00%) high severe
 
 turboshake256/4096/32 (cached)
-                        time:   [5.3983 µs 5.4146 µs 5.4330 µs]
-                        thrpt:  [718.98 MiB/s 721.43 MiB/s 723.61 MiB/s]
-Found 11 outliers among 100 measurements (11.00%)
-  7 (7.00%) high mild
-  4 (4.00%) high severe
+                        time:   [5.1313 µs 5.1456 µs 5.1615 µs]
+                        thrpt:  [756.80 MiB/s 759.14 MiB/s 761.26 MiB/s]
+Found 3 outliers among 100 measurements (3.00%)
+  1 (1.00%) high mild
+  2 (2.00%) high severe
 turboshake256/4096/32 (random)
-                        time:   [5.7319 µs 5.7521 µs 5.7741 µs]
-                        thrpt:  [676.51 MiB/s 679.10 MiB/s 681.49 MiB/s]
-Found 7 outliers among 100 measurements (7.00%)
-  3 (3.00%) high mild
-  4 (4.00%) high severe
+                        time:   [5.3920 µs 5.4127 µs 5.4342 µs]
+                        thrpt:  [718.82 MiB/s 721.68 MiB/s 724.45 MiB/s]
+Found 6 outliers among 100 measurements (6.00%)
+  4 (4.00%) high mild
+  2 (2.00%) high severe
 ```
 
 #### Scalar Keccak-p[1600, 12] Permutation
@@ -317,14 +320,14 @@ Using TurboSHAKE{128, 256} XOF API is fairly easy
 # either
 turboshake = { git = "https://github.com/itzmeanjan/turboshake" }
 # or
-turboshake = "0.1.5"
+turboshake = "0.1.6"
 
 # If interested in using underlying keccak-p[1600, 12] permutation and sponge (developer) API
-turboshake = { version = "0.1.5", features = "dev" }
+turboshake = { version = "0.1.6", features = "dev" }
 # or if interested in using underlying 2x SIMD parallel keccak-p[1600, 12] permutation API
-turboshake = { version = "0.1.5", features = ["dev", "simdx2"] }
+turboshake = { version = "0.1.6", features = ["dev", "simdx2"] }
 # or if interested in using underlying 4x SIMD parallel keccak-p[1600, 12] permutation API
-turboshake = { version = "0.1.5", features = ["dev", "simdx4"] }
+turboshake = { version = "0.1.6", features = ["dev", "simdx4"] }
 ```
 
 2) Create a TurboSHAKE{128, 256} XOF object.
