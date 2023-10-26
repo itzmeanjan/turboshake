@@ -107,4 +107,17 @@ impl TurboShake256 {
             out,
         );
     }
+
+    /// Given an instance of TurboShake256, this routine can be used for resetting the sponge state,
+    /// so that one might restart the absorb->finalize->squeeze cycle, on the same object.
+    ///
+    /// I found, it's sometimes pretty useful. See https://github.com/itzmeanjan/sha3/blob/faef1bd6/include/shake256.hpp#L74-L82
+    /// and https://github.com/itzmeanjan/kyber/blob/d7c0144d/include/kem.hpp#L106.
+    #[inline(always)]
+    pub fn reset(&mut self) {
+        self.state.fill(0u64);
+        self.offset = 0;
+        self.is_ready = usize::MIN;
+        self.squeezable = 0;
+    }
 }
