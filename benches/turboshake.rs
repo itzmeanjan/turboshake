@@ -24,7 +24,7 @@ type CriterionHandler = Criterion<CyclesPerByte>;
 type CriterionHandler = Criterion;
 
 fn turboshake128(c: &mut CriterionHandler) {
-    const DIGEST_LEN: usize = 32;
+    const DIGEST_LEN: usize = 64;
     const MIN_MSG_LEN: usize = 32;
     const MAX_MSG_LEN: usize = 4096;
 
@@ -33,7 +33,7 @@ fn turboshake128(c: &mut CriterionHandler) {
     let mut mlen = MIN_MSG_LEN;
     while mlen <= MAX_MSG_LEN {
         let mut group = c.benchmark_group("turboshake128");
-        group.throughput(Throughput::Bytes(mlen as u64));
+        group.throughput(Throughput::Bytes((mlen + DIGEST_LEN) as u64));
 
         group.bench_function(&format!("{}/{} (cached)", mlen, DIGEST_LEN), |bench| {
             let mut msg = vec![0u8; mlen];
@@ -70,7 +70,7 @@ fn turboshake128(c: &mut CriterionHandler) {
 }
 
 fn turboshake256(c: &mut CriterionHandler) {
-    const DIGEST_LEN: usize = 32;
+    const DIGEST_LEN: usize = 64;
     const MIN_MSG_LEN: usize = 32;
     const MAX_MSG_LEN: usize = 4096;
 
@@ -79,7 +79,7 @@ fn turboshake256(c: &mut CriterionHandler) {
     let mut mlen = MIN_MSG_LEN;
     while mlen <= MAX_MSG_LEN {
         let mut group = c.benchmark_group("turboshake256");
-        group.throughput(Throughput::Bytes(mlen as u64));
+        group.throughput(Throughput::Bytes((mlen + DIGEST_LEN) as u64));
 
         group.bench_function(&format!("{}/{} (cached)", mlen, DIGEST_LEN), |bench| {
             let mut msg = vec![0u8; mlen];
