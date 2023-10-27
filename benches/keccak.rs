@@ -2,8 +2,29 @@ use criterion::{black_box, criterion_group, criterion_main, BatchSize, Criterion
 use rand::{thread_rng, Rng};
 use turboshake::keccak;
 
+#[cfg(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "loongarch64"
+))]
+use criterion_cycles_per_byte::CyclesPerByte;
+
+#[cfg(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "loongarch64"
+))]
+type CriterionHandler = Criterion<CyclesPerByte>;
+
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "loongarch64"
+)))]
+type CriterionHandler = Criterion;
+
 #[cfg(not(any(feature = "simdx2", feature = "simdx4")))]
-fn keccak(c: &mut Criterion) {
+fn keccak(c: &mut CriterionHandler) {
     let mut rng = thread_rng();
 
     let mut group = c.benchmark_group("keccak");
@@ -30,7 +51,7 @@ fn keccak(c: &mut Criterion) {
 }
 
 #[cfg(any(feature = "simdx2", feature = "simdx4"))]
-fn keccak(c: &mut Criterion) {
+fn keccak(c: &mut CriterionHandler) {
     let mut rng = thread_rng();
 
     let mut group = c.benchmark_group("keccak");
@@ -121,5 +142,18 @@ fn keccak(c: &mut Criterion) {
     group.finish();
 }
 
+#[cfg(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "loongarch64"
+))]
+criterion_group!(name = permutation; config = Criterion::default().with_measurement(CyclesPerByte); targets = keccak);
+
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "loongarch64"
+)))]
 criterion_group!(permutation, keccak);
+
 criterion_main!(permutation);
