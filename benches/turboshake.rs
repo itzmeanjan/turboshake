@@ -24,94 +24,114 @@ type CriterionHandler = Criterion<CyclesPerByte>;
 type CriterionHandler = Criterion;
 
 fn turboshake128(c: &mut CriterionHandler) {
-    const DIGEST_LEN: usize = 64;
     const MIN_MSG_LEN: usize = 32;
-    const MAX_MSG_LEN: usize = 4096;
+    const MAX_MSG_LEN: usize = 8192;
+    const MIN_DIG_LEN: usize = 32;
+    const MAX_DIG_LEN: usize = 64;
 
     let mut rng = thread_rng();
 
     let mut mlen = MIN_MSG_LEN;
     while mlen <= MAX_MSG_LEN {
-        let mut group = c.benchmark_group("turboshake128");
-        group.throughput(Throughput::Bytes((mlen + DIGEST_LEN) as u64));
+        let mut dlen = MIN_DIG_LEN;
+        while dlen <= MAX_DIG_LEN {
+            let mut group = c.benchmark_group("turboshake128");
+            group.throughput(Throughput::Bytes((mlen + dlen) as u64));
 
-        group.bench_function(&format!("{}/{} (cached)", mlen, DIGEST_LEN), |bench| {
-            let mut msg = vec![0u8; mlen];
-            let mut dig = vec![0u8; DIGEST_LEN];
-            rng.fill_bytes(&mut msg);
+            group.bench_function(&format!("{}B msg/{}B dig (cached)", mlen, dlen), |bench| {
+                let mut msg = vec![0u8; mlen];
+                let mut dig = vec![0u8; dlen];
 
-            bench.iter(|| {
-                let mut hasher = TurboShake128::new();
-                hasher.absorb(black_box(&msg));
-                hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
-                hasher.squeeze(black_box(&mut dig));
-            });
-        });
-        group.bench_function(&format!("{}/{} (random)", mlen, DIGEST_LEN), |bench| {
-            let mut msg = vec![0u8; mlen];
-            let mut dig = vec![0u8; DIGEST_LEN];
-            rng.fill_bytes(&mut msg);
+                rng.fill_bytes(&mut msg);
 
-            bench.iter_batched(
-                || msg.clone(),
-                |msg| {
+                bench.iter(|| {
                     let mut hasher = TurboShake128::new();
+
                     hasher.absorb(black_box(&msg));
                     hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
                     hasher.squeeze(black_box(&mut dig));
-                },
-                BatchSize::SmallInput,
-            );
-        });
+                });
+            });
+            group.bench_function(&format!("{}B msg/{}B dig (random)", mlen, dlen), |bench| {
+                let mut msg = vec![0u8; mlen];
+                let dig = vec![0u8; dlen];
 
-        group.finish();
-        mlen = 2 * mlen;
+                rng.fill_bytes(&mut msg);
+
+                bench.iter_batched(
+                    || (msg.clone(), dig.clone()),
+                    |(msg, mut dig)| {
+                        let mut hasher = TurboShake128::new();
+
+                        hasher.absorb(black_box(&msg));
+                        hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+                        hasher.squeeze(black_box(&mut dig));
+                    },
+                    BatchSize::SmallInput,
+                );
+            });
+
+            group.finish();
+            dlen *= 2;
+        }
+
+        mlen *= 4;
     }
 }
 
 fn turboshake256(c: &mut CriterionHandler) {
-    const DIGEST_LEN: usize = 64;
     const MIN_MSG_LEN: usize = 32;
-    const MAX_MSG_LEN: usize = 4096;
+    const MAX_MSG_LEN: usize = 8192;
+    const MIN_DIG_LEN: usize = 32;
+    const MAX_DIG_LEN: usize = 64;
 
     let mut rng = thread_rng();
 
     let mut mlen = MIN_MSG_LEN;
     while mlen <= MAX_MSG_LEN {
-        let mut group = c.benchmark_group("turboshake256");
-        group.throughput(Throughput::Bytes((mlen + DIGEST_LEN) as u64));
+        let mut dlen = MIN_DIG_LEN;
+        while dlen <= MAX_DIG_LEN {
+            let mut group = c.benchmark_group("turboshake256");
+            group.throughput(Throughput::Bytes((mlen + dlen) as u64));
 
-        group.bench_function(&format!("{}/{} (cached)", mlen, DIGEST_LEN), |bench| {
-            let mut msg = vec![0u8; mlen];
-            let mut dig = vec![0u8; DIGEST_LEN];
-            rng.fill_bytes(&mut msg);
+            group.bench_function(&format!("{}B msg/{}B dig (cached)", mlen, dlen), |bench| {
+                let mut msg = vec![0u8; mlen];
+                let mut dig = vec![0u8; dlen];
 
-            bench.iter(|| {
-                let mut hasher = TurboShake256::new();
-                hasher.absorb(black_box(&msg));
-                hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
-                hasher.squeeze(black_box(&mut dig));
-            });
-        });
-        group.bench_function(&format!("{}/{} (random)", mlen, DIGEST_LEN), |bench| {
-            let mut msg = vec![0u8; mlen];
-            let mut dig = vec![0u8; DIGEST_LEN];
-            rng.fill_bytes(&mut msg);
+                rng.fill_bytes(&mut msg);
 
-            bench.iter_batched(
-                || msg.clone(),
-                |msg| {
+                bench.iter(|| {
                     let mut hasher = TurboShake256::new();
+
                     hasher.absorb(black_box(&msg));
                     hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
                     hasher.squeeze(black_box(&mut dig));
-                },
-                BatchSize::SmallInput,
-            );
-        });
+                });
+            });
+            group.bench_function(&format!("{}B msg/{}B dig (random)", mlen, dlen), |bench| {
+                let mut msg = vec![0u8; mlen];
+                let dig = vec![0u8; dlen];
 
-        group.finish();
-        mlen = 2 * mlen;
+                rng.fill_bytes(&mut msg);
+
+                bench.iter_batched(
+                    || (msg.clone(), dig.clone()),
+                    |(msg, mut dig)| {
+                        let mut hasher = TurboShake256::new();
+
+                        hasher.absorb(black_box(&msg));
+                        hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
+                        hasher.squeeze(black_box(&mut dig));
+                    },
+                    BatchSize::SmallInput,
+                );
+            });
+
+            group.finish();
+            dlen *= 2;
+        }
+
+        mlen *= 4;
     }
 }
 
