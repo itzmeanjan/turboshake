@@ -5,6 +5,7 @@ use turboshake::keccak;
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
+    target_arch = "aarch64",
     target_arch = "loongarch64"
 ))]
 use criterion_cycles_per_byte::CyclesPerByte;
@@ -12,6 +13,7 @@ use criterion_cycles_per_byte::CyclesPerByte;
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
+    target_arch = "aarch64",
     target_arch = "loongarch64"
 ))]
 type CriterionHandler = Criterion<CyclesPerByte>;
@@ -19,6 +21,7 @@ type CriterionHandler = Criterion<CyclesPerByte>;
 #[cfg(not(any(
     target_arch = "x86_64",
     target_arch = "x86",
+    target_arch = "aarch64",
     target_arch = "loongarch64"
 )))]
 type CriterionHandler = Criterion;
@@ -145,6 +148,7 @@ fn keccak(c: &mut CriterionHandler) {
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
+    target_arch = "aarch64",
     target_arch = "loongarch64"
 ))]
 criterion_group!(name = permutation; config = Criterion::default().with_measurement(CyclesPerByte); targets = keccak);
@@ -152,6 +156,7 @@ criterion_group!(name = permutation; config = Criterion::default().with_measurem
 #[cfg(not(any(
     target_arch = "x86_64",
     target_arch = "x86",
+    target_arch = "aarch64",
     target_arch = "loongarch64"
 )))]
 criterion_group!(permutation, keccak);

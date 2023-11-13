@@ -5,6 +5,7 @@ use turboshake::{TurboShake128, TurboShake256};
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
+    target_arch = "aarch64",
     target_arch = "loongarch64"
 ))]
 use criterion_cycles_per_byte::CyclesPerByte;
@@ -12,6 +13,7 @@ use criterion_cycles_per_byte::CyclesPerByte;
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
+    target_arch = "aarch64",
     target_arch = "loongarch64"
 ))]
 type CriterionHandler = Criterion<CyclesPerByte>;
@@ -19,6 +21,7 @@ type CriterionHandler = Criterion<CyclesPerByte>;
 #[cfg(not(any(
     target_arch = "x86_64",
     target_arch = "x86",
+    target_arch = "aarch64",
     target_arch = "loongarch64"
 )))]
 type CriterionHandler = Criterion;
@@ -138,6 +141,7 @@ fn turboshake256(c: &mut CriterionHandler) {
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
+    target_arch = "aarch64",
     target_arch = "loongarch64"
 ))]
 criterion_group!(name = hashing; config = Criterion::default().with_measurement(CyclesPerByte); targets = turboshake128, turboshake256);
@@ -145,6 +149,7 @@ criterion_group!(name = hashing; config = Criterion::default().with_measurement(
 #[cfg(not(any(
     target_arch = "x86_64",
     target_arch = "x86",
+    target_arch = "aarch64",
     target_arch = "loongarch64"
 )))]
 criterion_group!(hashing, turboshake128, turboshake256);
