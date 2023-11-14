@@ -1,6 +1,6 @@
 [package]
 name = "turboshake"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 authors = ["Anjan Roy <hello@itzmeanjan.in>"]
 description = "A family of extendable output functions based on keccak-p[1600, 12] permutation"
@@ -25,8 +25,8 @@ hex = "=0.4.3"
 criterion = "=0.5.1"
 test-case = "=3.2.1"
 
-[target.'cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "loongarch64"))'.dev-dependencies]
-criterion-cycles-per-byte = {git = "https://github.com/itzmeanjan/criterion-cycles-per-byte", rev = "2dc25c6"}
+[target.'cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64", target_arch = "loongarch64"))'.dev-dependencies]
+criterion-cycles-per-byte = {git = "https://github.com/itzmeanjan/criterion-cycles-per-byte", rev = "d2f5bf863"}
 
 [lib]
 bench = false
