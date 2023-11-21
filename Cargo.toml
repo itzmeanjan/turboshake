@@ -26,7 +26,7 @@ criterion = "=0.5.1"
 test-case = "=3.2.1"
 
 [target.'cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64", target_arch = "loongarch64"))'.dev-dependencies]
-criterion-cycles-per-byte = {git = "https://github.com/itzmeanjan/criterion-cycles-per-byte", rev = "d2f5bf863"}
+criterion-cycles-per-byte = {git = "https://github.com/itzmeanjan/criterion-cycles-per-byte", rev = "63edc6b46"}
 
 [lib]
 bench = false
