@@ -11,8 +11,8 @@ Here I'm maintaining a Rust library which implements TurboSHAKE{128, 256} Xof s.
 
 Rust nightly toolchain; see https://rustup.rs for installation guide.
 
-> **Note**
-Nightly toolchain is required because I use `portable_simd` feature ( more @ https://doc.rust-lang.org/std/simd/struct.Simd.html ) for SIMD implementation of Keccak-p[1600, 12] permutation. See [rust-toolchain](./rust-toolchain.toml) file for understanding how toolchain version is overridden in this crate.
+> [!NOTE]
+> Nightly toolchain is required because I use `portable_simd` feature ( more @ https://doc.rust-lang.org/std/simd/struct.Simd.html ) for SIMD implementation of Keccak-p[1600, 12] permutation. See [rust-toolchain](./rust-toolchain.toml) file for understanding how toolchain version is overridden in this crate.
 
 ```bash
 # When developing this library, I was using
@@ -44,14 +44,14 @@ RUSTFLAGS="-C opt-level=3 -C target-cpu=native" cargo test --lib keccak --featur
 
 Issue following command for benchmarking round-reduced Keccak-p[1600, 12] permutation and TurboSHAKE{128, 256} Xof, for variable input and output sizes.
 
-> **Note**
-When benchmarking on `x86`, `x86_64`, `aarch64` or `loongarch64` targets, CPU cycles and cycles/ byte metrics are reported, while for other targets, default wallclock timer of criterion.rs is used for reporting time and throughput. I found https://github.com/pornin/crrl/blob/73b33c1efc73d637f3084d197353991a22c10366/benches/util.rs pretty useful for obtaining CPU cycles when benchmarking Rust functions. But I'm using criterion.rs as benchmark harness, hence I decided to go with https://crates.io/crates/criterion-cycles-per-byte plugin, much easier to integrate. But I had to patch it for my usecase and they live in the branch `add-memfence` of my fork of `criterion-cycles-per-byte` ( see my commits @ https://github.com/itzmeanjan/criterion-cycles-per-byte/commits/add-memfence ).
+> [!NOTE]
+> When benchmarking on `x86`, `x86_64`, `aarch64` or `loongarch64` targets, CPU cycles and cycles/ byte metrics are reported, while for other targets, default wallclock timer of criterion.rs is used for reporting time and throughput. I found https://github.com/pornin/crrl/blob/73b33c1efc73d637f3084d197353991a22c10366/benches/util.rs pretty useful for obtaining CPU cycles when benchmarking Rust functions. But I'm using criterion.rs as benchmark harness, hence I decided to go with https://crates.io/crates/criterion-cycles-per-byte plugin, much easier to integrate. But I had to patch it for my usecase and they live in the branch `add-memfence` of my fork of `criterion-cycles-per-byte` ( see my commits @ https://github.com/itzmeanjan/criterion-cycles-per-byte/commits/add-memfence ).
 
-> **Note**
-In case you're running benchmarks on aarch64 target, consider reading https://github.com/itzmeanjan/criterion-cycles-per-byte/blob/d2f5bf8638640962a9b301966dbb3e65fbc6f283/src/lib.rs#L63-L70.
+> [!NOTE]
+> In case you're running benchmarks on aarch64 target, consider reading https://github.com/itzmeanjan/criterion-cycles-per-byte/blob/d2f5bf8638640962a9b301966dbb3e65fbc6f283/src/lib.rs#L63-L70.
 
-> **Warning**
-When benchmarking make sure you've disabled CPU frequency scaling, otherwise numbers you see can be pretty misleading. I found https://github.com/google/benchmark/blob/b40db869/docs/reducing_variance.md helpful.
+> [!WARNING]
+> When benchmarking make sure you've disabled CPU frequency scaling, otherwise numbers you see can be pretty misleading. I found https://github.com/google/benchmark/blob/b40db869/docs/reducing_variance.md helpful.
 
 ```bash
 # In case you didn't install `cargo-criterion`, you've to execute benchmark with
