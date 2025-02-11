@@ -24,7 +24,6 @@ impl TurboShake128 {
     /// Create a new instance of TurboSHAKE128 Extendable Output Function (XOF), into
     /// which arbitrary number of message bytes can be absorbed and arbitrary many bytes
     /// can be squeezed out.
-    #[inline(always)]
     pub fn new() -> Self {
         Self {
             state: [0u64; 25],
@@ -41,7 +40,6 @@ impl TurboShake128 {
     /// similar name ). Once finalized, calling this routine again doesn't do anything.
     ///
     /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/shake128.hpp#L43-L130
-    #[inline(always)]
     pub fn absorb(&mut self, msg: &[u8]) {
         if self.is_ready == usize::MAX {
             return;
@@ -66,7 +64,6 @@ impl TurboShake128 {
     /// Consider using D = 0x1f, if you don't need multiple instances of TurboSHAKE128 XOF.
     ///
     /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/shake128.hpp#L132-L192
-    #[inline(always)]
     pub fn finalize<const D: u8>(&mut self) {
         // See top of page 2 of https://ia.cr/2023/342
         debug_assert!(D >= 0x01 && D <= 0x7f);
@@ -95,7 +92,6 @@ impl TurboShake128 {
     /// it can't squeeze anything out.
     ///
     /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/shake128.hpp#L194-L238
-    #[inline(always)]
     pub fn squeeze(&mut self, out: &mut [u8]) {
         if self.is_ready != usize::MAX {
             return;
@@ -113,7 +109,6 @@ impl TurboShake128 {
     ///
     /// I found, it's sometimes pretty useful. See https://github.com/itzmeanjan/sha3/blob/faef1bd6/include/shake128.hpp#L74-L82
     /// and https://github.com/itzmeanjan/kyber/blob/d7c0144d/include/kem.hpp#L106.
-    #[inline(always)]
     pub fn reset(&mut self) {
         self.state.fill(0u64);
         self.offset = 0;
