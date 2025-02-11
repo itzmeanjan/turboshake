@@ -1,22 +1,35 @@
-name: TurboSHAKE
+name: TurboSHAKE - Extendable Output Functions based on 12-rounds Keccak Permutation
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        # See https://docs.github.com/en/actions/writing-workflows/choosing-where-your-workflow-runs/choosing-the-runner-for-a-job#standard-github-hosted-runners
+        # for available targets.
+        os: [
+            ubuntu-latest, # x86-64
+            ubuntu-24.04-arm, # aarch64
+            macos-latest, # aarch64
+            macos-13, # x86_64
+            windows-latest, # x86-64
+          ]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Run tests
-      run: RUSTFLAGS="-C opt-level=3 -C target-cpu=native" cargo test --lib --features simdx2,simdx4
-    - name: Run examples
-      run: cargo run --example turboshake128 && cargo run --example turboshake256
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Build and Test on ${{ matrix.os }}
+        run: cargo test
+
+      - name: Run Example on ${{ matrix.os }}
+        run: cargo run --example turboshake128 && cargo run --example turboshake256
