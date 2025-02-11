@@ -42,7 +42,3 @@ required-features = ["dev"]
 [[bench]]
 name = "turboshake"
 harness = false
-
-[[example]]
-name = "keccak"
-required-features = ["dev"]
