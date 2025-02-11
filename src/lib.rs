@@ -1,5 +1,3 @@
-#![feature(portable_simd)]
-
 #[cfg(feature = "dev")]
 pub mod keccak;
 #[cfg(not(feature = "dev"))]
