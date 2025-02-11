@@ -186,9 +186,9 @@ fn pi<T>(istate: &[T; 25], ostate: &mut [T; 25])
 where
     T: Copy,
 {
-        for i in 0..25 {
-            ostate[i] = istate[PERM[i]];
-        }
+    for i in 0..25 {
+        ostate[i] = istate[PERM[i]];
+    }
 }
 
 /// Keccak-p\[1600, 12\] step mapping function χ, see section 3.2.4 of SHA3
