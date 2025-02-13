@@ -1,7 +1,8 @@
 #![cfg(test)]
 
 use crate::{TurboShake128, TurboShake256};
-use rand::{thread_rng, RngCore};
+use rand::prelude::*;
+use rand_chacha::ChaCha8Rng;
 use std::cmp;
 use test_case::test_case;
 
@@ -309,7 +310,7 @@ fn test_turboshake256() {
 #[test_case(1024, 1024; "message length = 1024B, digest length = 1024B")]
 fn test_incremental_ts128_hashing(mlen: usize, dlen: usize) {
     // generate random input bytes ( of length mlen )
-    let mut rng = thread_rng();
+    let mut rng = ChaCha8Rng::from_os_rng();
     let mut msg = vec![0u8; mlen];
     rng.fill_bytes(&mut msg);
 
@@ -354,7 +355,7 @@ fn test_incremental_ts128_hashing(mlen: usize, dlen: usize) {
 #[test_case(1024, 1024; "message length = 1024B, digest length = 1024B")]
 fn test_incremental_ts256_hashing(mlen: usize, dlen: usize) {
     // generate random input bytes ( of length mlen )
-    let mut rng = thread_rng();
+    let mut rng = ChaCha8Rng::from_os_rng();
     let mut msg = vec![0u8; mlen];
     rng.fill_bytes(&mut msg);
 
