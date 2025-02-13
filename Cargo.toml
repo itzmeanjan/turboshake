@@ -20,20 +20,8 @@ dev = []
 rand = "=0.9.0"
 rand_chacha = "=0.9.0"
 hex = "=0.4.3"
-criterion = "=0.5.1"
 test-case = "=3.2.1"
-
-[target.'cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64", target_arch = "loongarch64"))'.dev-dependencies]
-criterion-cycles-per-byte = "=0.6.0"
-
-[profile.optimized]
-inherits = "release"
-codegen-units = 1
-lto = "thin"
-panic = "abort"
-
-[lib]
-bench = false
+divan = "=0.1.17"
 
 [[bench]]
 name = "keccak"
