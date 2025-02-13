@@ -11,19 +11,19 @@ const KECCAK_WORD_BYTE_LEN: usize = keccak::W / 8;
 /// - Rate portion will have bitwidth of 1600 - c.
 /// - `offset` will live in 0 <= offset < RATE_BYTES.
 #[inline(always)]
-pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
+pub fn absorb<const NUM_BYTES_IN_RATE: usize>(
     state: &mut [u64; 25],
     offset: &mut usize,
     msg: &[u8],
 ) {
-    const { assert!(RATE_BYTES % KECCAK_WORD_BYTE_LEN == 0) }
+    const { assert!(NUM_BYTES_IN_RATE % KECCAK_WORD_BYTE_LEN == 0) }
 
-    let mut block = [0u8; RATE_BYTES];
+    let mut block = [0u8; NUM_BYTES_IN_RATE];
     let mut msg_offset = 0;
 
     while msg_offset < msg.len() {
         let remaining_num_bytes = msg.len() - msg_offset;
-        let absorbable_num_bytes = min(remaining_num_bytes, RATE_BYTES - *offset);
+        let absorbable_num_bytes = min(remaining_num_bytes, NUM_BYTES_IN_RATE - *offset);
         let effective_block_byte_len = *offset + absorbable_num_bytes;
         let padded_efffective_block_len = (effective_block_byte_len + (KECCAK_WORD_BYTE_LEN - 1))
             & KECCAK_WORD_BYTE_LEN.wrapping_neg();
@@ -45,7 +45,7 @@ pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
         *offset += absorbable_num_bytes;
         msg_offset += absorbable_num_bytes;
 
-        if *offset == RATE_BYTES {
+        if *offset == NUM_BYTES_IN_RATE {
             keccak::permute(state);
             *offset = 0;
         }
@@ -60,16 +60,17 @@ pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
 /// - Rate portion will have bitwidth of 1600 - c.
 /// - `offset` will live in 0 <= offset < RATE_BYTES.
 #[inline(always)]
-pub fn finalize<const RATE_BYTES: usize, const RATE_WORDS: usize, const D: u8>(
+pub fn finalize<const NUM_BYTES_IN_RATE: usize, const D: u8>(
     state: &mut [u64; 25],
     offset: &mut usize,
 ) {
+    let num_words_in_rate = const { NUM_BYTES_IN_RATE / 8 };
     let state_word_index = *offset / KECCAK_WORD_BYTE_LEN;
     let byte_index_in_state_word = *offset % KECCAK_WORD_BYTE_LEN;
     let shl_bit_offset = byte_index_in_state_word * 8;
 
     state[state_word_index] ^= (D as u64) << shl_bit_offset;
-    state[RATE_WORDS - 1] ^= 0x80u64 << 56;
+    state[num_words_in_rate - 1] ^= 0x80u64 << 56;
 
     keccak::permute(state);
     *offset = 0;
@@ -83,18 +84,18 @@ pub fn finalize<const RATE_BYTES: usize, const RATE_WORDS: usize, const D: u8>(
 /// - `readable` denotes how many bytes can be squeezed without permutating the sponge state.
 /// - When `readable` becomes 0, state needs to be permutated again, after which RATE_BYTES can be squeezed.
 #[inline(always)]
-pub fn squeeze<const RATE_BYTES: usize, const RATE_WORDS: usize>(
+pub fn squeeze<const NUM_BYTES_IN_RATE: usize>(
     state: &mut [u64; 25],
     readable: &mut usize,
     out: &mut [u8],
 ) {
-    const { assert!(RATE_BYTES % KECCAK_WORD_BYTE_LEN == 0) }
+    const { assert!(NUM_BYTES_IN_RATE % KECCAK_WORD_BYTE_LEN == 0) }
 
-    let mut block = [0u8; RATE_BYTES];
+    let mut block = [0u8; NUM_BYTES_IN_RATE];
     let mut out_offset = 0;
 
     while out_offset < out.len() {
-        let state_byte_offset = RATE_BYTES - *readable;
+        let state_byte_offset = NUM_BYTES_IN_RATE - *readable;
         let remaining_num_bytes = out.len() - out_offset;
         let squeezable_num_bytes = min(remaining_num_bytes, *readable);
         let effective_block_byte_len = state_byte_offset + squeezable_num_bytes;
@@ -117,7 +118,7 @@ pub fn squeeze<const RATE_BYTES: usize, const RATE_WORDS: usize>(
 
         if *readable == 0 {
             keccak::permute(state);
-            *readable = RATE_BYTES;
+            *readable = NUM_BYTES_IN_RATE;
         }
     }
 }

@@ -19,7 +19,6 @@ impl TurboShake128 {
     const CAPACITY_BITS: usize = 256;
     const RATE_BITS: usize = 1600 - Self::CAPACITY_BITS;
     const RATE_BYTES: usize = Self::RATE_BITS / 8;
-    const RATE_WORDS: usize = Self::RATE_BYTES / 8;
 
     /// Create a new instance of TurboSHAKE128 Extendable Output Function (XOF), into
     /// which arbitrary number of message bytes can be absorbed and arbitrary many bytes
@@ -45,11 +44,7 @@ impl TurboShake128 {
             return;
         }
 
-        sponge::absorb::<{ Self::RATE_BYTES }, { Self::RATE_WORDS }>(
-            &mut self.state,
-            &mut self.offset,
-            msg,
-        );
+        sponge::absorb::<{ Self::RATE_BYTES }>(&mut self.state, &mut self.offset, msg);
     }
 
     /// After consuming N -bytes ( by invoking absorb routine arbitrary many times,
@@ -72,10 +67,7 @@ impl TurboShake128 {
             return;
         }
 
-        sponge::finalize::<{ Self::RATE_BYTES }, { Self::RATE_WORDS }, { D }>(
-            &mut self.state,
-            &mut self.offset,
-        );
+        sponge::finalize::<{ Self::RATE_BYTES }, { D }>(&mut self.state, &mut self.offset);
 
         self.is_ready = usize::MAX;
         self.squeezable = Self::RATE_BYTES;
@@ -97,11 +89,7 @@ impl TurboShake128 {
             return;
         }
 
-        sponge::squeeze::<{ Self::RATE_BYTES }, { Self::RATE_WORDS }>(
-            &mut self.state,
-            &mut self.squeezable,
-            out,
-        );
+        sponge::squeeze::<{ Self::RATE_BYTES }>(&mut self.state, &mut self.squeezable, out);
     }
 
     /// Given an instance of TurboShake128, this routine can be used for resetting the sponge state,
