@@ -1,6 +1,8 @@
 use crate::keccak;
 use std::cmp::{self, min};
 
+const KECCAK_WORD_BYTE_LEN: usize = keccak::W / 8;
+
 /// Given N -bytes message, this routine consumes it into Keccak\[c\] permutation state s.t.
 /// `offset` ( second parameter ) denotes how many bytes are already consumed into rate portion
 /// of the state.
@@ -14,7 +16,6 @@ pub fn absorb<const RATE_BYTES: usize, const RATE_WORDS: usize>(
     offset: &mut usize,
     msg: &[u8],
 ) {
-    const KECCAK_WORD_BYTE_LEN: usize = std::mem::size_of::<u64>();
     const { assert!(RATE_BYTES % KECCAK_WORD_BYTE_LEN == 0) }
 
     let mut block = [0u8; RATE_BYTES];
@@ -63,14 +64,12 @@ pub fn finalize<const RATE_BYTES: usize, const RATE_WORDS: usize, const D: u8>(
     state: &mut [u64; 25],
     offset: &mut usize,
 ) {
-    let mut blk_bytes = [0u8; RATE_BYTES];
-    blk_bytes[*offset] = D;
-    blk_bytes[RATE_BYTES - 1] ^= 0x80;
+    let state_word_index = *offset / KECCAK_WORD_BYTE_LEN;
+    let byte_index_in_state_word = *offset % KECCAK_WORD_BYTE_LEN;
+    let shl_bit_offset = byte_index_in_state_word * 8;
 
-    for i in 0..RATE_WORDS {
-        let word = u64::from_le_bytes(blk_bytes[i * 8..(i + 1) * 8].try_into().unwrap());
-        state[i] ^= word;
-    }
+    state[state_word_index] ^= (D as u64) << shl_bit_offset;
+    state[RATE_WORDS - 1] ^= 0x80u64 << 56;
 
     keccak::permute(state);
     *offset = 0;

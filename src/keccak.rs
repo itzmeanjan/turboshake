@@ -2,7 +2,7 @@
 const L: usize = 6;
 
 /// Bit width of each lane of Keccak-p\[1600, 12\] permutation.
-const W: usize = 1 << L;
+pub const W: usize = 1 << L;
 
 /// \# -of lanes in keccak permutation state s.t. each lane is of 64 -bit width.
 const LANE_CNT: usize = 25;
