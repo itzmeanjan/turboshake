@@ -1,5 +1,5 @@
 use crate::keccak;
-use std::cmp::{self, min};
+use std::cmp::min;
 
 const KECCAK_WORD_BYTE_LEN: usize = keccak::W / 8;
 
