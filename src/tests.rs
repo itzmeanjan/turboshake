@@ -205,90 +205,106 @@ fn test_turboshake256() {
 
 /// Test if both oneshot and incremental hashing API of TurboSHAKE128 produces same result for same input message.
 ///
-/// Adapated from https://github.com/itzmeanjan/ascon/blob/f9ce50dd23b89e073e1f8fe94318d694e9b6770e/include/test/test_incremental_hashing.hpp#L11-L56
+/// Adapated from https://github.com/itzmeanjan/ascon/blob/9c155ecab7f2713081d52fcafdb4824725745c9c/tests/prop_test_ascon_xof128.cpp#L45-L99
 #[test_case(32, 32; "message length = 32B, digest length = 32B")]
-#[test_case(64, 64; "message length = 64B, digest length = 64B")]
 #[test_case(128, 128; "message length = 128B, digest length = 128B")]
-#[test_case(256, 256; "message length = 256B, digest length = 256B")]
 #[test_case(512, 512; "message length = 512B, digest length = 512B")]
-#[test_case(1024, 1024; "message length = 1024B, digest length = 1024B")]
+#[test_case(2048, 2048; "message length = 2kB, digest length = 2kB")]
+#[test_case(8192, 8192; "message length = 8kB, digest length = 8kB")]
+#[test_case(32768, 32768; "message length = 32kB, digest length = 32kB")]
 fn test_incremental_ts128_hashing(mlen: usize, dlen: usize) {
     // generate random input bytes ( of length mlen )
     let mut rng = ChaCha8Rng::from_os_rng();
     let mut msg = vec![0u8; mlen];
     rng.fill_bytes(&mut msg);
 
-    // digest computed by oneshot hasher
-    let mut dig0 = vec![0u8; dlen];
-    // digest computed by incremental hasher
-    let mut dig1 = vec![0u8; dlen];
+    let mut md_oneshot = vec![0u8; dlen];
+    let mut md_incremental = vec![0u8; dlen];
 
     // oneshot hashing
-    let mut hasher0 = TurboShake128::new();
-    assert!(hasher0.absorb(&msg));
-    assert!(hasher0.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
-    assert!(hasher0.squeeze(&mut dig0));
+    let mut hasher_oneshot = TurboShake128::new();
+    assert!(hasher_oneshot.absorb(&msg));
+    assert!(hasher_oneshot.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(hasher_oneshot.squeeze(&mut md_oneshot));
 
     // incremental hashing
-    let mut hasher1 = TurboShake128::new();
+    let mut hasher_incremental = TurboShake128::new();
 
-    let mut off = 0;
-    while off < mlen {
+    let mut msg_offset = 0;
+    while msg_offset < mlen {
         // because we don't want to be stuck in an infinite loop if msg[off] = 0 !
-        let elen = cmp::min(cmp::max(msg[off] as usize, 1), mlen - off);
+        let elen = cmp::min(cmp::max(msg[msg_offset] as usize, 1), mlen - msg_offset);
 
-        assert!(hasher1.absorb(&msg[off..(off + elen)]));
-        off += elen;
+        assert!(hasher_incremental.absorb(&msg[msg_offset..(msg_offset + elen)]));
+        msg_offset += elen;
     }
 
-    assert!(hasher1.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
-    assert!(hasher1.squeeze(&mut dig1));
+    assert!(hasher_incremental.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
+
+    let mut md_offset = 0;
+    while md_offset < dlen {
+        assert!(hasher_incremental.squeeze(&mut md_incremental[md_offset..(md_offset + 1)]));
+        md_offset += 1;
+
+        let elen = cmp::min(md_incremental[md_offset - 1] as usize, dlen - md_offset);
+        assert!(hasher_incremental.squeeze(&mut md_incremental[md_offset..(md_offset + elen)]));
+
+        md_offset += elen;
+    }
 
     // finally compare if both of them arrive at same digest or not !
-    assert_eq!(dig0, dig1);
+    assert_eq!(md_oneshot, md_incremental);
 }
 
 /// Test if both oneshot and incremental hashing API of TurboSHAKE256 produces same result for same input message.
 ///
-/// Adapated from https://github.com/itzmeanjan/ascon/blob/f9ce50dd23b89e073e1f8fe94318d694e9b6770e/include/test/test_incremental_hashing.hpp#L11-L56
+/// Adapated from https://github.com/itzmeanjan/ascon/blob/9c155ecab7f2713081d52fcafdb4824725745c9c/tests/prop_test_ascon_xof128.cpp#L45-L99
 #[test_case(32, 32; "message length = 32B, digest length = 32B")]
-#[test_case(64, 64; "message length = 64B, digest length = 64B")]
 #[test_case(128, 128; "message length = 128B, digest length = 128B")]
-#[test_case(256, 256; "message length = 256B, digest length = 256B")]
 #[test_case(512, 512; "message length = 512B, digest length = 512B")]
-#[test_case(1024, 1024; "message length = 1024B, digest length = 1024B")]
+#[test_case(2048, 2048; "message length = 2kB, digest length = 2kB")]
+#[test_case(8192, 8192; "message length = 8kB, digest length = 8kB")]
+#[test_case(32768, 32768; "message length = 32kB, digest length = 32kB")]
 fn test_incremental_ts256_hashing(mlen: usize, dlen: usize) {
     // generate random input bytes ( of length mlen )
     let mut rng = ChaCha8Rng::from_os_rng();
     let mut msg = vec![0u8; mlen];
     rng.fill_bytes(&mut msg);
 
-    // digest computed by oneshot hasher
-    let mut dig0 = vec![0u8; dlen];
-    // digest computed by incremental hasher
-    let mut dig1 = vec![0u8; dlen];
+    let mut md_oneshot = vec![0u8; dlen];
+    let mut md_incremental = vec![0u8; dlen];
 
     // oneshot hashing
-    let mut hasher0 = TurboShake256::new();
-    assert!(hasher0.absorb(&msg));
-    assert!(hasher0.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
-    assert!(hasher0.squeeze(&mut dig0));
+    let mut hasher_oneshot = TurboShake256::new();
+    assert!(hasher_oneshot.absorb(&msg));
+    assert!(hasher_oneshot.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(hasher_oneshot.squeeze(&mut md_oneshot));
 
     // incremental hashing
-    let mut hasher1 = TurboShake256::new();
+    let mut hasher_incremental = TurboShake256::new();
 
-    let mut off = 0;
-    while off < mlen {
+    let mut msg_offset = 0;
+    while msg_offset < mlen {
         // because we don't want to be stuck in an infinite loop if msg[off] = 0 !
-        let elen = cmp::min(cmp::max(msg[off] as usize, 1), mlen - off);
+        let elen = cmp::min(cmp::max(msg[msg_offset] as usize, 1), mlen - msg_offset);
 
-        assert!(hasher1.absorb(&msg[off..(off + elen)]));
-        off += elen;
+        assert!(hasher_incremental.absorb(&msg[msg_offset..(msg_offset + elen)]));
+        msg_offset += elen;
     }
 
-    assert!(hasher1.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
-    assert!(hasher1.squeeze(&mut dig1));
+    assert!(hasher_incremental.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
+
+    let mut md_offset = 0;
+    while md_offset < dlen {
+        assert!(hasher_incremental.squeeze(&mut md_incremental[md_offset..(md_offset + 1)]));
+        md_offset += 1;
+
+        let elen = cmp::min(md_incremental[md_offset - 1] as usize, dlen - md_offset);
+        assert!(hasher_incremental.squeeze(&mut md_incremental[md_offset..(md_offset + elen)]));
+
+        md_offset += elen;
+    }
 
     // finally compare if both of them arrive at same digest or not !
-    assert_eq!(dig0, dig1);
+    assert_eq!(md_oneshot, md_incremental);
 }
