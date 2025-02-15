@@ -1,35 +1,28 @@
 [package]
 name = "turboshake"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
+resolver = "2"
+rust-version = "1.84.0"
 authors = ["Anjan Roy <hello@itzmeanjan.in>"]
 description = "A family of extendable output functions based on keccak-p[1600, 12] permutation"
-documentation = "https://github.com/itzmeanjan/turboshake"
 readme = "README.md"
 repository = "https://github.com/itzmeanjan/turboshake.git"
 license = "MIT"
 keywords = ["cryptography", "keccak", "xof", "hashing", "turboshake"]
-categories = ["cryptography"]
+categories = ["cryptography", "algorithms"]
 
 [features]
 dev = []
-simdx2 = []
-simdx4 = []
 
 [dependencies]
-crunchy = "=0.2.2"
 
 [dev-dependencies]
-rand = "=0.8.5"
+rand = "=0.9.0"
+rand_chacha = "=0.9.0"
 hex = "=0.4.3"
-criterion = "=0.5.1"
-test-case = "=3.2.1"
-
-[target.'cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64", target_arch = "loongarch64"))'.dev-dependencies]
-criterion-cycles-per-byte = "=0.6.0"
-
-[lib]
-bench = false
+test-case = "=3.3.1"
+divan = "=0.1.17"
 
 [[bench]]
 name = "keccak"
@@ -40,10 +33,8 @@ required-features = ["dev"]
 name = "turboshake"
 harness = false
 
-[[example]]
-name = "keccak"
-required-features = ["dev"]
-
-[[example]]
-name = "simd_keccak"
-required-features = ["dev", "simdx4"]
+[profile.optimized]
+inherits = "release"
+codegen-units = 1
+lto = "thin"
+panic = "abort"
