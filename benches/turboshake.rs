@@ -71,7 +71,7 @@ fn turboshake128(bencher: divan::Bencher, io_size: &InputOutputSize) {
         .counter(ItemsCount::new(1usize))
         .with_inputs(|| (msg.clone(), md.clone()))
         .bench_values(|(msg, mut md)| {
-            let mut hasher = TurboShake128::new();
+            let mut hasher = TurboShake128::default();
 
             hasher.absorb(divan::black_box(&msg));
             hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
@@ -94,7 +94,7 @@ fn turboshake256(bencher: divan::Bencher, io_size: &InputOutputSize) {
         .counter(ItemsCount::new(1usize))
         .with_inputs(|| (msg.clone(), md.clone()))
         .bench_values(|(msg, mut md)| {
-            let mut hasher = TurboShake256::new();
+            let mut hasher = TurboShake256::default();
 
             hasher.absorb(divan::black_box(&msg));
             hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();

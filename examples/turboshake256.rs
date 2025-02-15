@@ -12,7 +12,7 @@ fn main() {
     let dlen = 32;
     let mut dig = vec![0u8; dlen];
 
-    let mut hasher = TurboShake256::new();
+    let mut hasher = TurboShake256::default();
     hasher.absorb(&msg[..mlen / 2]);
     hasher.absorb(&msg[mlen / 2..]);
     hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();

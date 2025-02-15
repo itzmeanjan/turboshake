@@ -31,7 +31,7 @@ fn ptn(n: usize) -> Vec<u8> {
 /// finalizing it by using domain seperator constant D ( generic constant parameter )
 /// and returning TurboSHAKE128 object, ready to be squeezed.
 fn turboshake128<const D: u8>(msg: &[u8]) -> TurboShake128 {
-    let mut hasher = TurboShake128::new();
+    let mut hasher = TurboShake128::default();
     assert!(hasher.absorb(msg));
     assert!(hasher.finalize::<D>());
     hasher
@@ -41,7 +41,7 @@ fn turboshake128<const D: u8>(msg: &[u8]) -> TurboShake128 {
 /// finalizing it by using domain seperator constant D ( generic constant parameter )
 /// and returning TurboSHAKE256 object, ready to be squeezed.
 fn turboshake256<const D: u8>(msg: &[u8]) -> TurboShake256 {
-    let mut hasher = TurboShake256::new();
+    let mut hasher = TurboShake256::default();
     assert!(hasher.absorb(msg));
     assert!(hasher.finalize::<D>());
     hasher
@@ -218,13 +218,13 @@ fn test_incremental_ts128_hashing(mlen: usize, dlen: usize) {
     let mut md_incremental = vec![0u8; dlen];
 
     // oneshot hashing
-    let mut hasher_oneshot = TurboShake128::new();
+    let mut hasher_oneshot = TurboShake128::default();
     assert!(hasher_oneshot.absorb(&msg));
     assert!(hasher_oneshot.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
     assert!(hasher_oneshot.squeeze(&mut md_oneshot));
 
     // incremental hashing
-    let mut hasher_incremental = TurboShake128::new();
+    let mut hasher_incremental = TurboShake128::default();
 
     let mut msg_offset = 0;
     while msg_offset < mlen {
@@ -271,13 +271,13 @@ fn test_incremental_ts256_hashing(mlen: usize, dlen: usize) {
     let mut md_incremental = vec![0u8; dlen];
 
     // oneshot hashing
-    let mut hasher_oneshot = TurboShake256::new();
+    let mut hasher_oneshot = TurboShake256::default();
     assert!(hasher_oneshot.absorb(&msg));
     assert!(hasher_oneshot.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
     assert!(hasher_oneshot.squeeze(&mut md_oneshot));
 
     // incremental hashing
-    let mut hasher_incremental = TurboShake256::new();
+    let mut hasher_incremental = TurboShake256::default();
 
     let mut msg_offset = 0;
     while msg_offset < mlen {
