@@ -11,6 +11,33 @@ pub struct TurboShake256 {
     squeezable: usize,
 }
 
+impl Default for TurboShake256 {
+    /// Create a default instance of TurboSHAKE256 Extendable Output Function (XOF).
+    ///
+    /// # Inputs
+    ///
+    /// None
+    ///
+    /// # Outputs
+    ///
+    /// A default `TurboShake256` object.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use turboshake::{TurboShake256};
+    /// let mut shake = TurboShake256::default();
+    /// ```
+    fn default() -> Self {
+        Self {
+            state: [0u64; 25],
+            offset: 0,
+            is_ready: usize::MIN,
+            squeezable: 0,
+        }
+    }
+}
+
 impl TurboShake256 {
     /// If you don't need multiple instances of TurboSHAKE256, feel free to pass this as domain seperator constant, during finalization.
     pub const DEFAULT_DOMAIN_SEPARATOR: u8 = 0x1f;
@@ -20,31 +47,6 @@ impl TurboShake256 {
     const CAPACITY_BITS: usize = 2 * Self::TARGET_BIT_SECURITY_LEVEL;
     const RATE_BITS: usize = Self::BIT_LENGTH_OF_KECCAK_PERMUTATION_STATE - Self::CAPACITY_BITS;
     const RATE_BYTES: usize = Self::RATE_BITS / u8::BITS as usize;
-
-    /// Create a new instance of TurboSHAKE256 Extendable Output Function (XOF).
-    ///
-    /// # Inputs
-    ///
-    /// None
-    ///
-    /// # Outputs
-    ///
-    /// A new `TurboShake256` object.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use turboshake::{TurboShake256};
-    /// let mut shake = TurboShake256::new();
-    /// ```
-    pub fn new() -> Self {
-        Self {
-            state: [0u64; 25],
-            offset: 0,
-            is_ready: usize::MIN,
-            squeezable: 0,
-        }
-    }
 
     /// Absorbs arbitrary many input bytes into the TurboSHAKE256 sponge state.
     ///
@@ -60,7 +62,7 @@ impl TurboShake256 {
     ///
     /// ```
     /// use turboshake::{TurboShake256};
-    /// let mut shake = TurboShake256::new();
+    /// let mut shake = TurboShake256::default();
     /// let message = b"This is a test message";
     /// shake.absorb(message);
     /// ```
@@ -87,7 +89,7 @@ impl TurboShake256 {
     ///
     /// ```
     /// use turboshake::{TurboShake256};
-    /// let mut shake = TurboShake256::new();
+    /// let mut shake = TurboShake256::default();
     /// let message = b"This is a test message";
     /// shake.absorb(message);
     /// shake.finalize::<{TurboShake256::DEFAULT_DOMAIN_SEPARATOR}>();
@@ -121,7 +123,7 @@ impl TurboShake256 {
     ///
     /// ```
     /// use turboshake::{TurboShake256};
-    /// let mut shake = TurboShake256::new();
+    /// let mut shake = TurboShake256::default();
     /// let message = b"This is a test message";
     /// shake.absorb(message);
     /// shake.finalize::<{TurboShake256::DEFAULT_DOMAIN_SEPARATOR}>();
