@@ -1,4 +1,4 @@
-name: TurboSHAKE - Extendable Output Functions based on 12-rounds Keccak Permutation
+name: TurboSHAKE
 
 on:
   push:
