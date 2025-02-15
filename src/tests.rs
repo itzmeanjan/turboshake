@@ -367,7 +367,7 @@ fn test_incremental_ts256_hashing(mlen: usize, dlen: usize) {
     // oneshot hashing
     let mut hasher0 = TurboShake256::new();
     hasher0.absorb(&msg);
-    hasher0.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+    hasher0.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
     hasher0.squeeze(&mut dig0);
 
     // incremental hashing
@@ -382,7 +382,7 @@ fn test_incremental_ts256_hashing(mlen: usize, dlen: usize) {
         off += elen;
     }
 
-    hasher1.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+    hasher1.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
     hasher1.squeeze(&mut dig1);
 
     // finally compare if both of them arrive at same digest or not !
