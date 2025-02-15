@@ -304,3 +304,99 @@ fn test_incremental_ts256_hashing(mlen: usize, dlen: usize) {
     // finally compare if both of them arrive at same digest or not !
     assert_eq!(md_oneshot, md_incremental);
 }
+
+#[test]
+fn state_transition_should_work_in_ts128() {
+    let msg = b"msg";
+    let mut md = [0u8; 32];
+
+    // absorb -> finalize -> squeeze
+    let mut hasher = TurboShake128::default();
+    assert!(hasher.absorb(msg));
+    assert!(hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(hasher.squeeze(&mut md));
+
+    // finalize -> finalize -> squeeze
+    let mut hasher = TurboShake128::default();
+    assert!(hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(!hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(hasher.squeeze(&mut md));
+
+    // squeeze -> finalize -> squeeze
+    let mut hasher = TurboShake128::default();
+    assert!(!hasher.squeeze(&mut md));
+    assert!(hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(hasher.squeeze(&mut md));
+
+    // absorb -> absorb -> squeeze
+    let mut hasher = TurboShake128::default();
+    assert!(hasher.absorb(msg));
+    assert!(hasher.absorb(msg));
+    assert!(!hasher.squeeze(&mut md));
+
+    // absorb -> squeeze -> squeeze
+    let mut hasher = TurboShake128::default();
+    assert!(hasher.absorb(msg));
+    assert!(!hasher.squeeze(&mut md));
+    assert!(!hasher.squeeze(&mut md));
+
+    // absorb -> finalize -> absorb
+    let mut hasher = TurboShake128::default();
+    assert!(hasher.absorb(msg));
+    assert!(hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(!hasher.absorb(msg));
+
+    // absorb -> finalize -> finalize
+    let mut hasher = TurboShake128::default();
+    assert!(hasher.absorb(msg));
+    assert!(hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(!hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>());
+}
+
+#[test]
+fn state_transition_should_work_in_ts256() {
+    let msg = b"msg";
+    let mut md = [0u8; 32];
+
+    // absorb -> finalize -> squeeze
+    let mut hasher = TurboShake256::default();
+    assert!(hasher.absorb(msg));
+    assert!(hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(hasher.squeeze(&mut md));
+
+    // finalize -> finalize -> squeeze
+    let mut hasher = TurboShake256::default();
+    assert!(hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(!hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(hasher.squeeze(&mut md));
+
+    // squeeze -> finalize -> squeeze
+    let mut hasher = TurboShake256::default();
+    assert!(!hasher.squeeze(&mut md));
+    assert!(hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(hasher.squeeze(&mut md));
+
+    // absorb -> absorb -> squeeze
+    let mut hasher = TurboShake256::default();
+    assert!(hasher.absorb(msg));
+    assert!(hasher.absorb(msg));
+    assert!(!hasher.squeeze(&mut md));
+
+    // absorb -> squeeze -> squeeze
+    let mut hasher = TurboShake256::default();
+    assert!(hasher.absorb(msg));
+    assert!(!hasher.squeeze(&mut md));
+    assert!(!hasher.squeeze(&mut md));
+
+    // absorb -> finalize -> absorb
+    let mut hasher = TurboShake256::default();
+    assert!(hasher.absorb(msg));
+    assert!(hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(!hasher.absorb(msg));
+
+    // absorb -> finalize -> finalize
+    let mut hasher = TurboShake256::default();
+    assert!(hasher.absorb(msg));
+    assert!(hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
+    assert!(!hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>());
+}
