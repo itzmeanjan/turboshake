@@ -2,6 +2,8 @@
 name = "turboshake"
 version = "0.2.0"
 edition = "2021"
+resolver = "2"
+rust-version = "1.84.0"
 authors = ["Anjan Roy <hello@itzmeanjan.in>"]
 description = "A family of extendable output functions based on keccak-p[1600, 12] permutation"
 documentation = "https://github.com/itzmeanjan/turboshake"
@@ -9,7 +11,7 @@ readme = "README.md"
 repository = "https://github.com/itzmeanjan/turboshake.git"
 license = "MIT"
 keywords = ["cryptography", "keccak", "xof", "hashing", "turboshake"]
-categories = ["cryptography"]
+categories = ["cryptography", "algorithms"]
 
 [features]
 dev = []
