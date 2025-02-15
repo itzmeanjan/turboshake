@@ -64,7 +64,7 @@ impl TurboShake128 {
     /// use turboshake::{TurboShake128};
     /// let mut shake = TurboShake128::default();
     /// let message = b"This is a test message";
-    /// shake.absorb(message);
+    /// assert!(shake.absorb(message));
     /// ```
     pub fn absorb(&mut self, msg: &[u8]) -> bool {
         if self.is_ready == usize::MAX {
@@ -91,8 +91,8 @@ impl TurboShake128 {
     /// use turboshake::{TurboShake128};
     /// let mut shake = TurboShake128::default();
     /// let message = b"This is a test message";
-    /// shake.absorb(message);
-    /// shake.finalize::<{TurboShake128::DEFAULT_DOMAIN_SEPARATOR}>();
+    /// assert!(shake.absorb(message));
+    /// assert!(shake.finalize::<{TurboShake128::DEFAULT_DOMAIN_SEPARATOR}>());
     /// ```
     pub fn finalize<const D: u8>(&mut self) -> bool {
         // See top of page 2 of https://ia.cr/2023/342
@@ -125,10 +125,10 @@ impl TurboShake128 {
     /// use turboshake::{TurboShake128};
     /// let mut shake = TurboShake128::default();
     /// let message = b"This is a test message";
-    /// shake.absorb(message);
-    /// shake.finalize::<{TurboShake128::DEFAULT_DOMAIN_SEPARATOR}>();
+    /// assert!(shake.absorb(message));
+    /// assert!(shake.finalize::<{TurboShake128::DEFAULT_DOMAIN_SEPARATOR}>());
     /// let mut output = [0u8; 32];
-    /// shake.squeeze(&mut output);
+    /// assert!(shake.squeeze(&mut output));
     /// ```
     pub fn squeeze(&mut self, out: &mut [u8]) -> bool {
         if self.is_ready != usize::MAX {
