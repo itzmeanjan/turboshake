@@ -18,9 +18,6 @@ fn main() {
     hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
     hasher.squeeze(&mut dig[..dlen / 2]);
     hasher.squeeze(&mut dig[dlen / 2..]);
-    hasher.reset();
-
-    // You may begin the absorb->finalize->squeeze cycle again !
 
     println!("Message: {}", hex::encode(&msg));
     println!("Digest: {}", hex::encode(&dig));
