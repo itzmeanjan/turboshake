@@ -1,157 +1,110 @@
-use criterion::{black_box, criterion_group, criterion_main, BatchSize, Criterion, Throughput};
-use rand::{thread_rng, RngCore};
+use divan;
+use divan::counter::{BytesCount, BytesFormat, ItemsCount};
+use rand::prelude::*;
+use rand_chacha::ChaCha8Rng;
+use std::fmt::Display;
 use turboshake::{TurboShake128, TurboShake256};
 
-#[cfg(any(
-    target_arch = "x86_64",
-    target_arch = "x86",
-    target_arch = "aarch64",
-    target_arch = "loongarch64"
-))]
-use criterion_cycles_per_byte::CyclesPerByte;
+fn main() {
+    divan::Divan::default()
+        .bytes_format(BytesFormat::Binary)
+        .run_benches();
+}
 
-#[cfg(any(
-    target_arch = "x86_64",
-    target_arch = "x86",
-    target_arch = "aarch64",
-    target_arch = "loongarch64"
-))]
-type CriterionHandler = Criterion<CyclesPerByte>;
+struct InputOutputSize {
+    msg_byte_len: usize,
+    md_byte_len: usize,
+}
 
-#[cfg(not(any(
-    target_arch = "x86_64",
-    target_arch = "x86",
-    target_arch = "aarch64",
-    target_arch = "loongarch64"
-)))]
-type CriterionHandler = Criterion;
+fn format_bytes(bytes: usize) -> String {
+    let suffixes = ["B", "KB", "MB", "GB"];
+    let mut index = 0;
+    let mut size = bytes as f64;
 
-fn turboshake128(c: &mut CriterionHandler) {
-    const MIN_MSG_LEN: usize = 32;
-    const MAX_MSG_LEN: usize = 8192;
-    const MIN_DIG_LEN: usize = 32;
-    const MAX_DIG_LEN: usize = 64;
+    while size >= 1024.0 && index < suffixes.len() - 1 {
+        size /= 1024.0;
+        index += 1;
+    }
 
-    let mut rng = thread_rng();
+    format!("{:.1}{}", size, suffixes[index])
+}
 
-    let mut mlen = MIN_MSG_LEN;
-    while mlen <= MAX_MSG_LEN {
-        let mut dlen = MIN_DIG_LEN;
-        while dlen <= MAX_DIG_LEN {
-            let mut group = c.benchmark_group("turboshake128");
-            group.throughput(Throughput::Bytes((mlen + dlen) as u64));
-
-            group.bench_function(&format!("{}B msg/{}B dig (cached)", mlen, dlen), |bench| {
-                let mut msg = vec![0u8; mlen];
-                let mut dig = vec![0u8; dlen];
-
-                rng.fill_bytes(&mut msg);
-
-                bench.iter(|| {
-                    let mut hasher = TurboShake128::new();
-
-                    hasher.absorb(black_box(&msg));
-                    hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
-                    hasher.squeeze(black_box(&mut dig));
-                });
-            });
-            group.bench_function(&format!("{}B msg/{}B dig (random)", mlen, dlen), |bench| {
-                let mut msg = vec![0u8; mlen];
-                let dig = vec![0u8; dlen];
-
-                rng.fill_bytes(&mut msg);
-
-                bench.iter_batched(
-                    || (msg.clone(), dig.clone()),
-                    |(msg, mut dig)| {
-                        let mut hasher = TurboShake128::new();
-
-                        hasher.absorb(black_box(&msg));
-                        hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
-                        hasher.squeeze(black_box(&mut dig));
-                    },
-                    BatchSize::SmallInput,
-                );
-            });
-
-            group.finish();
-            dlen *= 2;
-        }
-
-        mlen *= 4;
+impl Display for InputOutputSize {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "msg = {}, md = {}",
+            format_bytes(self.msg_byte_len),
+            format_bytes(self.md_byte_len)
+        )
     }
 }
 
-fn turboshake256(c: &mut CriterionHandler) {
-    const MIN_MSG_LEN: usize = 32;
-    const MAX_MSG_LEN: usize = 8192;
-    const MIN_DIG_LEN: usize = 32;
-    const MAX_DIG_LEN: usize = 64;
+const ARGS: &[InputOutputSize] = &[
+    InputOutputSize {
+        msg_byte_len: 32,
+        md_byte_len: 64,
+    },
+    InputOutputSize {
+        msg_byte_len: 128,
+        md_byte_len: 64,
+    },
+    InputOutputSize {
+        msg_byte_len: 512,
+        md_byte_len: 64,
+    },
+    InputOutputSize {
+        msg_byte_len: 2048,
+        md_byte_len: 64,
+    },
+    InputOutputSize {
+        msg_byte_len: 8192,
+        md_byte_len: 64,
+    },
+];
 
-    let mut rng = thread_rng();
+#[divan::bench(args = ARGS)]
+fn turboshake128(bencher: divan::Bencher, io_size: &InputOutputSize) {
+    let mut rng = ChaCha8Rng::from_os_rng();
 
-    let mut mlen = MIN_MSG_LEN;
-    while mlen <= MAX_MSG_LEN {
-        let mut dlen = MIN_DIG_LEN;
-        while dlen <= MAX_DIG_LEN {
-            let mut group = c.benchmark_group("turboshake256");
-            group.throughput(Throughput::Bytes((mlen + dlen) as u64));
+    let mut msg = vec![0u8; io_size.msg_byte_len];
+    let mut md = vec![0u8; io_size.md_byte_len];
 
-            group.bench_function(&format!("{}B msg/{}B dig (cached)", mlen, dlen), |bench| {
-                let mut msg = vec![0u8; mlen];
-                let mut dig = vec![0u8; dlen];
+    rng.fill_bytes(&mut msg);
+    rng.fill_bytes(&mut md);
 
-                rng.fill_bytes(&mut msg);
+    bencher
+        .counter(BytesCount::new(io_size.msg_byte_len + io_size.md_byte_len))
+        .counter(ItemsCount::new(1usize))
+        .with_inputs(|| (msg.clone(), md.clone()))
+        .bench_values(|(msg, mut md)| {
+            let mut hasher = TurboShake128::new();
 
-                bench.iter(|| {
-                    let mut hasher = TurboShake256::new();
-
-                    hasher.absorb(black_box(&msg));
-                    hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
-                    hasher.squeeze(black_box(&mut dig));
-                });
-            });
-            group.bench_function(&format!("{}B msg/{}B dig (random)", mlen, dlen), |bench| {
-                let mut msg = vec![0u8; mlen];
-                let dig = vec![0u8; dlen];
-
-                rng.fill_bytes(&mut msg);
-
-                bench.iter_batched(
-                    || (msg.clone(), dig.clone()),
-                    |(msg, mut dig)| {
-                        let mut hasher = TurboShake256::new();
-
-                        hasher.absorb(black_box(&msg));
-                        hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
-                        hasher.squeeze(black_box(&mut dig));
-                    },
-                    BatchSize::SmallInput,
-                );
-            });
-
-            group.finish();
-            dlen *= 2;
-        }
-
-        mlen *= 4;
-    }
+            hasher.absorb(divan::black_box(&msg));
+            hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+            hasher.squeeze(divan::black_box(&mut md));
+        });
 }
 
-#[cfg(any(
-    target_arch = "x86_64",
-    target_arch = "x86",
-    target_arch = "aarch64",
-    target_arch = "loongarch64"
-))]
-criterion_group!(name = hashing; config = Criterion::default().with_measurement(CyclesPerByte); targets = turboshake128, turboshake256);
+#[divan::bench(args = ARGS)]
+fn turboshake256(bencher: divan::Bencher, io_size: &InputOutputSize) {
+    let mut rng = ChaCha8Rng::from_os_rng();
 
-#[cfg(not(any(
-    target_arch = "x86_64",
-    target_arch = "x86",
-    target_arch = "aarch64",
-    target_arch = "loongarch64"
-)))]
-criterion_group!(hashing, turboshake128, turboshake256);
+    let mut msg = vec![0u8; io_size.msg_byte_len];
+    let mut md = vec![0u8; io_size.md_byte_len];
 
-criterion_main!(hashing);
+    rng.fill_bytes(&mut msg);
+    rng.fill_bytes(&mut md);
+
+    bencher
+        .counter(BytesCount::new(io_size.msg_byte_len + io_size.md_byte_len))
+        .counter(ItemsCount::new(1usize))
+        .with_inputs(|| (msg.clone(), md.clone()))
+        .bench_values(|(msg, mut md)| {
+            let mut hasher = TurboShake256::new();
+
+            hasher.absorb(divan::black_box(&msg));
+            hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
+            hasher.squeeze(divan::black_box(&mut md));
+        });
+}
