@@ -5,7 +5,7 @@ const L: usize = 6;
 pub const W: usize = 1 << L;
 
 /// \# -of lanes in keccak permutation state s.t. each lane is of 64 -bit width.
-const LANE_CNT: usize = 25;
+pub const LANE_CNT: usize = 25;
 
 /// \# -of rounds of Keccak permutation is applied per iteration i.e. it's Keccak-p\[1600, 12\].
 const ROUNDS: usize = 12;
