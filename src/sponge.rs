@@ -11,11 +11,7 @@ const KECCAK_WORD_BYTE_LEN: usize = keccak::W / 8;
 /// - Rate portion will have bitwidth of 1600 - c.
 /// - `offset` will live in 0 <= offset < RATE_BYTES.
 #[inline(always)]
-pub fn absorb<const NUM_BYTES_IN_RATE: usize>(
-    state: &mut [u64; 25],
-    offset: &mut usize,
-    msg: &[u8],
-) {
+pub fn absorb<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; 25], offset: &mut usize, msg: &[u8]) {
     const { assert!(NUM_BYTES_IN_RATE % KECCAK_WORD_BYTE_LEN == 0) }
 
     let mut block = [0u8; NUM_BYTES_IN_RATE];
@@ -25,22 +21,18 @@ pub fn absorb<const NUM_BYTES_IN_RATE: usize>(
         let remaining_num_bytes = msg.len() - msg_offset;
         let absorbable_num_bytes = min(remaining_num_bytes, NUM_BYTES_IN_RATE - *offset);
         let effective_block_byte_len = *offset + absorbable_num_bytes;
-        let padded_efffective_block_len = (effective_block_byte_len + (KECCAK_WORD_BYTE_LEN - 1))
-            & KECCAK_WORD_BYTE_LEN.wrapping_neg();
+        let padded_efffective_block_len = (effective_block_byte_len + (KECCAK_WORD_BYTE_LEN - 1)) & KECCAK_WORD_BYTE_LEN.wrapping_neg();
 
         block[..padded_efffective_block_len].fill(0);
-        block[*offset..(*offset + absorbable_num_bytes)]
-            .copy_from_slice(&msg[msg_offset..(msg_offset + absorbable_num_bytes)]);
+        block[*offset..(*offset + absorbable_num_bytes)].copy_from_slice(&msg[msg_offset..(msg_offset + absorbable_num_bytes)]);
 
         let mut state_word_index = 0;
-        block[..padded_efffective_block_len]
-            .chunks_exact(KECCAK_WORD_BYTE_LEN)
-            .for_each(|chunk_bytes| {
-                let chunk_as_word = u64::from_le_bytes(chunk_bytes.try_into().unwrap());
+        block[..padded_efffective_block_len].chunks_exact(KECCAK_WORD_BYTE_LEN).for_each(|chunk_bytes| {
+            let chunk_as_word = u64::from_le_bytes(chunk_bytes.try_into().unwrap());
 
-                state[state_word_index] ^= chunk_as_word;
-                state_word_index += 1;
-            });
+            state[state_word_index] ^= chunk_as_word;
+            state_word_index += 1;
+        });
 
         *offset += absorbable_num_bytes;
         msg_offset += absorbable_num_bytes;
@@ -60,10 +52,7 @@ pub fn absorb<const NUM_BYTES_IN_RATE: usize>(
 /// - Rate portion will have bitwidth of 1600 - c.
 /// - `offset` will live in 0 <= offset < RATE_BYTES.
 #[inline(always)]
-pub fn finalize<const NUM_BYTES_IN_RATE: usize, const D: u8>(
-    state: &mut [u64; 25],
-    offset: &mut usize,
-) {
+pub fn finalize<const NUM_BYTES_IN_RATE: usize, const D: u8>(state: &mut [u64; 25], offset: &mut usize) {
     let num_words_in_rate = const { NUM_BYTES_IN_RATE / 8 };
     let state_word_index = *offset / KECCAK_WORD_BYTE_LEN;
     let byte_index_in_state_word = *offset % KECCAK_WORD_BYTE_LEN;
@@ -84,11 +73,7 @@ pub fn finalize<const NUM_BYTES_IN_RATE: usize, const D: u8>(
 /// - `readable` denotes how many bytes can be squeezed without permutating the sponge state.
 /// - When `readable` becomes 0, state needs to be permutated again, after which RATE_BYTES can be squeezed.
 #[inline(always)]
-pub fn squeeze<const NUM_BYTES_IN_RATE: usize>(
-    state: &mut [u64; 25],
-    readable: &mut usize,
-    out: &mut [u8],
-) {
+pub fn squeeze<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; 25], readable: &mut usize, out: &mut [u8]) {
     const { assert!(NUM_BYTES_IN_RATE % KECCAK_WORD_BYTE_LEN == 0) }
 
     let mut block = [0u8; NUM_BYTES_IN_RATE];
@@ -99,8 +84,7 @@ pub fn squeeze<const NUM_BYTES_IN_RATE: usize>(
         let remaining_num_bytes = out.len() - out_offset;
         let squeezable_num_bytes = min(remaining_num_bytes, *readable);
         let effective_block_byte_len = state_byte_offset + squeezable_num_bytes;
-        let padded_efffective_block_len = (effective_block_byte_len + (KECCAK_WORD_BYTE_LEN - 1))
-            & KECCAK_WORD_BYTE_LEN.wrapping_neg();
+        let padded_efffective_block_len = (effective_block_byte_len + (KECCAK_WORD_BYTE_LEN - 1)) & KECCAK_WORD_BYTE_LEN.wrapping_neg();
 
         let mut state_word_index = 0;
         block[..padded_efffective_block_len]
@@ -110,8 +94,7 @@ pub fn squeeze<const NUM_BYTES_IN_RATE: usize>(
                 state_word_index += 1;
             });
 
-        out[out_offset..(out_offset + squeezable_num_bytes)]
-            .copy_from_slice(&block[state_byte_offset..(state_byte_offset + squeezable_num_bytes)]);
+        out[out_offset..(out_offset + squeezable_num_bytes)].copy_from_slice(&block[state_byte_offset..(state_byte_offset + squeezable_num_bytes)]);
 
         *readable -= squeezable_num_bytes;
         out_offset += squeezable_num_bytes;

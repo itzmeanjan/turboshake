@@ -172,10 +172,7 @@ fn theta(state: &mut [u64; 25]) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
 #[inline(always)]
 fn rho(state: &mut [u64; 25]) {
-    state
-        .iter_mut()
-        .enumerate()
-        .for_each(|(i, v)| *v = v.rotate_left(ROT[i] as u32));
+    state.iter_mut().enumerate().for_each(|(i, v)| *v = v.rotate_left(ROT[i] as u32));
 }
 
 /// Keccak-p\[1600, 12\] step mapping function π, see section 3.2.3 of SHA3
@@ -187,10 +184,7 @@ fn pi<T>(istate: &[T; 25], ostate: &mut [T; 25])
 where
     T: Copy,
 {
-    ostate
-        .iter_mut()
-        .enumerate()
-        .for_each(|(i, v)| *v = istate[PERM[i]]);
+    ostate.iter_mut().enumerate().for_each(|(i, v)| *v = istate[PERM[i]]);
 }
 
 /// Keccak-p\[1600, 12\] step mapping function χ, see section 3.2.4 of SHA3

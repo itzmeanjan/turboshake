@@ -6,9 +6,7 @@ use std::fmt::Display;
 use turboshake::{TurboShake128, TurboShake256};
 
 fn main() {
-    divan::Divan::default()
-        .bytes_format(BytesFormat::Binary)
-        .run_benches();
+    divan::Divan::default().bytes_format(BytesFormat::Binary).run_benches();
 }
 
 struct InputOutputSize {
@@ -31,12 +29,7 @@ fn format_bytes(bytes: usize) -> String {
 
 impl Display for InputOutputSize {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "msg = {}, md = {}",
-            format_bytes(self.msg_byte_len),
-            format_bytes(self.md_byte_len)
-        )
+        write!(f, "msg = {}, md = {}", format_bytes(self.msg_byte_len), format_bytes(self.md_byte_len))
     }
 }
 

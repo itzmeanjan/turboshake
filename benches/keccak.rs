@@ -5,9 +5,7 @@ use rand_chacha::ChaCha8Rng;
 use turboshake::keccak;
 
 fn main() {
-    divan::Divan::default()
-        .bytes_format(BytesFormat::Binary)
-        .run_benches();
+    divan::Divan::default().bytes_format(BytesFormat::Binary).run_benches();
 }
 
 #[divan::bench]
