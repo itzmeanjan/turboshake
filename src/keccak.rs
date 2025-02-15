@@ -142,7 +142,7 @@ fn theta(state: &mut [u64; 25]) {
     let mut c = [0u64; 5];
 
     for i in (0..25).step_by(5) {
-        c[0] ^= state[i + 0];
+        c[0] ^= state[i];
         c[1] ^= state[i + 1];
         c[2] ^= state[i + 2];
         c[3] ^= state[i + 3];
@@ -158,7 +158,7 @@ fn theta(state: &mut [u64; 25]) {
     d[4] = c[3] ^ c[0].rotate_left(1);
 
     for i in (0..25).step_by(5) {
-        state[i + 0] ^= d[0];
+        state[i] ^= d[0];
         state[i + 1] ^= d[1];
         state[i + 2] ^= d[2];
         state[i + 3] ^= d[3];
@@ -196,11 +196,11 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
     for y in 0..5 {
         let off = y * 5;
 
-        ostate[off + 0] = istate[off + 0] ^ (!istate[off + 1] & istate[off + 2]);
+        ostate[off] = istate[off] ^ (!istate[off + 1] & istate[off + 2]);
         ostate[off + 1] = istate[off + 1] ^ (!istate[off + 2] & istate[off + 3]);
         ostate[off + 2] = istate[off + 2] ^ (!istate[off + 3] & istate[off + 4]);
-        ostate[off + 3] = istate[off + 3] ^ (!istate[off + 4] & istate[off + 0]);
-        ostate[off + 4] = istate[off + 4] ^ (!istate[off + 0] & istate[off + 1]);
+        ostate[off + 3] = istate[off + 3] ^ (!istate[off + 4] & istate[off]);
+        ostate[off + 4] = istate[off + 4] ^ (!istate[off] & istate[off + 1]);
     }
 }
 
