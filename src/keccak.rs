@@ -242,6 +242,8 @@ fn round(state: &mut [u64; 25], ridx: usize) {
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L253-L493
 #[inline(always)]
 pub fn permute(state: &mut [u64; 25]) {
+    const { assert!(ROUNDS % 2 == 0) }
+
     for i in (0..ROUNDS).step_by(2) {
         round(state, i);
         round(state, i + 1);
