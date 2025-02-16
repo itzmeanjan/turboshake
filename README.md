@@ -38,46 +38,46 @@ cargo bench --all-features --profile optimized                # Both of above
 Running kernel `Linux 6.11.0-14-generic x86_64`, with Rust compiler `1.84.1 (e71f9a9a9 2025-01-27)`, compiled in `optimized` mode.
 
 ```bash
-Timer precision: 20 ns
-keccak                fastest       │ slowest       │ median        │ mean          │ samples │ iters
-╰─ permute_12_rounds  92.07 ns      │ 97.82 ns      │ 92.66 ns      │ 92.81 ns      │ 100     │ 3200
-                      2.022 GiB/s   │ 1.904 GiB/s   │ 2.01 GiB/s    │ 2.006 GiB/s   │         │
-                      10.86 Mitem/s │ 10.22 Mitem/s │ 10.79 Mitem/s │ 10.77 Mitem/s │         │
-
 Timer precision: 19 ns
+keccak                fastest       │ slowest       │ median        │ mean          │ samples │ iters
+╰─ permute_12_rounds  92.88 ns      │ 100.1 ns      │ 97.21 ns      │ 96.48 ns      │ 100     │ 3200
+                      2.005 GiB/s   │ 1.86 GiB/s    │ 1.916 GiB/s   │ 1.93 GiB/s    │         │
+                      10.76 Mitem/s │ 9.989 Mitem/s │ 10.28 Mitem/s │ 10.36 Mitem/s │         │
+
+Timer precision: 20 ns
 turboshake                      fastest       │ slowest       │ median        │ mean          │ samples │ iters
 ├─ turboshake128                              │               │               │               │         │
-│  ├─ msg = 2.0KB, md = 64.0B   1.618 µs      │ 5.18 µs       │ 1.652 µs      │ 1.701 µs      │ 100     │ 100
-│  │                            1.215 GiB/s   │ 388.7 MiB/s   │ 1.19 GiB/s    │ 1.155 GiB/s   │         │
-│  │                            617.8 Kitem/s │ 193 Kitem/s   │ 605.1 Kitem/s │ 587.5 Kitem/s │         │
-│  ├─ msg = 8.0KB, md = 64.0B   5.084 µs      │ 12.19 µs      │ 5.137 µs      │ 5.559 µs      │ 100     │ 100
-│  │                            1.512 GiB/s   │ 645.6 MiB/s   │ 1.496 GiB/s   │ 1.383 GiB/s   │         │
-│  │                            196.6 Kitem/s │ 82 Kitem/s    │ 194.6 Kitem/s │ 179.8 Kitem/s │         │
-│  ├─ msg = 32.0B, md = 64.0B   122.7 ns      │ 136.9 ns      │ 123.9 ns      │ 124.5 ns      │ 100     │ 1600
-│  │                            745.9 MiB/s   │ 668.6 MiB/s   │ 738.8 MiB/s   │ 735 MiB/s     │         │
-│  │                            8.147 Mitem/s │ 7.303 Mitem/s │ 8.069 Mitem/s │ 8.028 Mitem/s │         │
-│  ├─ msg = 128.0B, md = 64.0B  125.1 ns      │ 257.3 ns      │ 127.4 ns      │ 130.6 ns      │ 100     │ 800
-│  │                            1.429 GiB/s   │ 711.4 MiB/s   │ 1.403 GiB/s   │ 1.368 GiB/s   │         │
-│  │                            7.993 Mitem/s │ 3.885 Mitem/s │ 7.848 Mitem/s │ 7.654 Mitem/s │         │
-│  ╰─ msg = 512.0B, md = 64.0B  438.2 ns      │ 2.916 µs      │ 486.2 ns      │ 525 ns        │ 100     │ 800
-│                               1.224 GiB/s   │ 188.3 MiB/s   │ 1.103 GiB/s   │ 1.021 GiB/s   │         │
-│                               2.281 Mitem/s │ 342.8 Kitem/s │ 2.056 Mitem/s │ 1.904 Mitem/s │         │
+│  ├─ msg = 2.0KB, md = 64.0B   1.387 µs      │ 3.142 µs      │ 1.426 µs      │ 1.564 µs      │ 100     │ 100
+│  │                            1.417 GiB/s   │ 640.9 MiB/s   │ 1.379 GiB/s   │ 1.257 GiB/s   │         │
+│  │                            720.6 Kitem/s │ 318.2 Kitem/s │ 701.2 Kitem/s │ 639.1 Kitem/s │         │
+│  ├─ msg = 8.0KB, md = 64.0B   5.068 µs      │ 7.756 µs      │ 6.32 µs       │ 6.29 µs       │ 100     │ 100
+│  │                            1.516 GiB/s   │ 1015 MiB/s    │ 1.216 GiB/s   │ 1.222 GiB/s   │         │
+│  │                            197.2 Kitem/s │ 128.9 Kitem/s │ 158.2 Kitem/s │ 158.9 Kitem/s │         │
+│  ├─ msg = 32.0B, md = 64.0B   142.6 ns      │ 323.5 ns      │ 144.9 ns      │ 147.9 ns      │ 100     │ 1600
+│  │                            641.7 MiB/s   │ 282.9 MiB/s   │ 631.4 MiB/s   │ 619 MiB/s     │         │
+│  │                            7.009 Mitem/s │ 3.09 Mitem/s  │ 6.897 Mitem/s │ 6.761 Mitem/s │         │
+│  ├─ msg = 128.0B, md = 64.0B  142.2 ns      │ 220.8 ns      │ 149.5 ns      │ 150.5 ns      │ 100     │ 1600
+│  │                            1.256 GiB/s   │ 829 MiB/s     │ 1.195 GiB/s   │ 1.187 GiB/s   │         │
+│  │                            7.027 Mitem/s │ 4.527 Mitem/s │ 6.687 Mitem/s │ 6.642 Mitem/s │         │
+│  ╰─ msg = 512.0B, md = 64.0B  506.8 ns      │ 598.3 ns      │ 537.3 ns      │ 541.7 ns      │ 100     │ 400
+│                               1.058 GiB/s   │ 918 MiB/s     │ 1022 MiB/s    │ 1013 MiB/s    │         │
+│                               1.972 Mitem/s │ 1.671 Mitem/s │ 1.86 Mitem/s  │ 1.845 Mitem/s │         │
 ╰─ turboshake256                              │               │               │               │         │
-   ├─ msg = 2.0KB, md = 64.0B   1.637 µs      │ 5.427 µs      │ 1.665 µs      │ 1.736 µs      │ 100     │ 100
-   │                            1.201 GiB/s   │ 371 MiB/s     │ 1.18 GiB/s    │ 1.132 GiB/s   │         │
-   │                            610.6 Kitem/s │ 184.2 Kitem/s │ 600.3 Kitem/s │ 575.7 Kitem/s │         │
-   ├─ msg = 8.0KB, md = 64.0B   6.103 µs      │ 10.97 µs      │ 6.164 µs      │ 6.529 µs      │ 100     │ 100
-   │                            1.259 GiB/s   │ 717.2 MiB/s   │ 1.247 GiB/s   │ 1.177 GiB/s   │         │
-   │                            163.8 Kitem/s │ 91.09 Kitem/s │ 162.2 Kitem/s │ 153.1 Kitem/s │         │
-   ├─ msg = 32.0B, md = 64.0B   117.2 ns      │ 131.2 ns      │ 118.9 ns      │ 119.2 ns      │ 100     │ 1600
-   │                            780.9 MiB/s   │ 697.6 MiB/s   │ 769.4 MiB/s   │ 767.8 MiB/s   │         │
-   │                            8.53 Mitem/s  │ 7.62 Mitem/s  │ 8.404 Mitem/s │ 8.386 Mitem/s │         │
-   ├─ msg = 128.0B, md = 64.0B  124 ns        │ 145.7 ns      │ 126.4 ns      │ 127.7 ns      │ 100     │ 1600
-   │                            1.441 GiB/s   │ 1.227 GiB/s   │ 1.413 GiB/s   │ 1.399 GiB/s   │         │
-   │                            8.061 Mitem/s │ 6.861 Mitem/s │ 7.906 Mitem/s │ 7.827 Mitem/s │         │
-   ╰─ msg = 512.0B, md = 64.0B  432.1 ns      │ 497.8 ns      │ 449.4 ns      │ 450.2 ns      │ 100     │ 400
-                                1.241 GiB/s   │ 1.077 GiB/s   │ 1.193 GiB/s   │ 1.191 GiB/s   │         │
-                                2.314 Mitem/s │ 2.008 Mitem/s │ 2.224 Mitem/s │ 2.22 Mitem/s  │         │
+   ├─ msg = 2.0KB, md = 64.0B   2.09 µs       │ 4.833 µs      │ 2.117 µs      │ 2.152 µs      │ 100     │ 100
+   │                            963.4 MiB/s   │ 416.6 MiB/s   │ 951.3 MiB/s   │ 935.8 MiB/s   │         │
+   │                            478.3 Kitem/s │ 206.8 Kitem/s │ 472.3 Kitem/s │ 464.6 Kitem/s │         │
+   ├─ msg = 8.0KB, md = 64.0B   6.267 µs      │ 11.58 µs      │ 6.329 µs      │ 6.801 µs      │ 100     │ 100
+   │                            1.226 GiB/s   │ 679.3 MiB/s   │ 1.214 GiB/s   │ 1.13 GiB/s    │         │
+   │                            159.5 Kitem/s │ 86.28 Kitem/s │ 158 Kitem/s   │ 147 Kitem/s   │         │
+   ├─ msg = 32.0B, md = 64.0B   114.9 ns      │ 456.7 ns      │ 142.4 ns      │ 148 ns        │ 100     │ 3200
+   │                            796.2 MiB/s   │ 200.4 MiB/s   │ 642.9 MiB/s   │ 618.4 MiB/s   │         │
+   │                            8.697 Mitem/s │ 2.189 Mitem/s │ 7.022 Mitem/s │ 6.755 Mitem/s │         │
+   ├─ msg = 128.0B, md = 64.0B  119.2 ns      │ 198.9 ns      │ 134.1 ns      │ 131 ns        │ 100     │ 1600
+   │                            1.499 GiB/s   │ 920.5 MiB/s   │ 1.332 GiB/s   │ 1.364 GiB/s   │         │
+   │                            8.387 Mitem/s │ 5.027 Mitem/s │ 7.451 Mitem/s │ 7.633 Mitem/s │         │
+   ╰─ msg = 512.0B, md = 64.0B  486.8 ns      │ 548.1 ns      │ 505.6 ns      │ 504.4 ns      │ 100     │ 400
+                                1.101 GiB/s   │ 1002 MiB/s    │ 1.06 GiB/s    │ 1.063 GiB/s   │         │
+                                2.053 Mitem/s │ 1.824 Mitem/s │ 1.977 Mitem/s │ 1.982 Mitem/s │         │
 ```
 
 ## Usage
