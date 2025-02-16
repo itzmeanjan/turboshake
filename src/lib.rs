@@ -45,6 +45,7 @@ pub mod sponge;
 #[cfg(not(feature = "dev"))]
 mod sponge;
 
+mod branch_opt_util;
 mod tests;
 mod turboshake128;
 mod turboshake256;
