@@ -138,10 +138,10 @@ const fn compute_round_constants_table() -> [u64; ROUNDS] {
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L145-L175
 #[inline(always)]
-fn theta(state: &mut [u64; 25]) {
+fn theta(state: &mut [u64; LANE_CNT]) {
     let mut c = [0u64; 5];
 
-    for i in (0..25).step_by(5) {
+    for i in (0..LANE_CNT).step_by(5) {
         c[0] ^= state[i];
         c[1] ^= state[i + 1];
         c[2] ^= state[i + 2];
@@ -157,7 +157,7 @@ fn theta(state: &mut [u64; 25]) {
     d[3] = c[2] ^ c[4].rotate_left(1);
     d[4] = c[3] ^ c[0].rotate_left(1);
 
-    for i in (0..25).step_by(5) {
+    for i in (0..LANE_CNT).step_by(5) {
         state[i] ^= d[0];
         state[i + 1] ^= d[1];
         state[i + 2] ^= d[2];
@@ -171,7 +171,7 @@ fn theta(state: &mut [u64; 25]) {
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
 #[inline(always)]
-fn rho(state: &mut [u64; 25]) {
+fn rho(state: &mut [u64; LANE_CNT]) {
     state.iter_mut().enumerate().for_each(|(i, v)| *v = v.rotate_left(ROT[i] as u32));
 }
 
@@ -180,10 +180,7 @@ fn rho(state: &mut [u64; 25]) {
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L192-L207
 #[inline(always)]
-fn pi<T>(istate: &[T; 25], ostate: &mut [T; 25])
-where
-    T: Copy,
-{
+fn pi(istate: &[u64; LANE_CNT], ostate: &mut [u64; LANE_CNT]) {
     ostate.iter_mut().enumerate().for_each(|(i, v)| *v = istate[PERM[i]]);
 }
 
@@ -192,15 +189,18 @@ where
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L209-L227
 #[inline(always)]
-fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
+fn chi(state: &mut [u64; LANE_CNT]) {
     for y in 0..5 {
         let off = y * 5;
 
-        ostate[off] = istate[off] ^ (!istate[off + 1] & istate[off + 2]);
-        ostate[off + 1] = istate[off + 1] ^ (!istate[off + 2] & istate[off + 3]);
-        ostate[off + 2] = istate[off + 2] ^ (!istate[off + 3] & istate[off + 4]);
-        ostate[off + 3] = istate[off + 3] ^ (!istate[off + 4] & istate[off]);
-        ostate[off + 4] = istate[off + 4] ^ (!istate[off] & istate[off + 1]);
+        let t0 = state[off];
+        let t1 = state[off + 1];
+
+        state[off] ^= !t1 & state[off + 2];
+        state[off + 1] ^= !state[off + 2] & state[off + 3];
+        state[off + 2] ^= !state[off + 3] & state[off + 4];
+        state[off + 3] ^= !state[off + 4] & t0;
+        state[off + 4] ^= !t0 & t1;
     }
 }
 
@@ -209,24 +209,30 @@ fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
 #[inline(always)]
-fn iota(lane: u64, ridx: usize) -> u64 {
-    lane ^ RC[ridx]
+fn iota(state: &mut [u64; LANE_CNT], ridx: usize) {
+    state[0] ^= RC[ridx];
 }
 
-/// Keccak-p\[1600, 12\] round function, which applies all five
-/// step mapping functions in order, mutating state array, following
-/// section 3.3 of https://dx.doi.org/10.6028/NIST.FIPS.202
+/// Keccak-p\[1600, 12\] round function, which applies all five step mapping functions in order,
+/// twice for two consecutive rounds, mutating state array, following section 3.3 of
+/// https://dx.doi.org/10.6028/NIST.FIPS.202
 ///
-/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L237-L251
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b6ce9069/include/sha3/internals/keccak.hpp#L707-L730
 #[inline(always)]
-fn round(state: &mut [u64; 25], ridx: usize) {
-    let mut _state = [0u64; 25];
+fn roundx2(state: &mut [u64; LANE_CNT], ridx: usize) {
+    let mut tmp_state = [0u64; LANE_CNT];
 
     theta(state);
     rho(state);
-    pi(state, &mut _state);
-    chi(&_state, state);
-    state[0] = iota(state[0], ridx);
+    pi(state, &mut tmp_state);
+    chi(&mut tmp_state);
+    iota(&mut tmp_state, ridx);
+
+    theta(&mut tmp_state);
+    rho(&mut tmp_state);
+    pi(&mut tmp_state, state);
+    chi(state);
+    iota(state, ridx + 1);
 }
 
 /// Keccak-p\[1600, 12\] permutation, applying 12 rounds of permutation
@@ -235,11 +241,11 @@ fn round(state: &mut [u64; 25], ridx: usize) {
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L253-L493
 #[inline(always)]
-pub fn permute(state: &mut [u64; 25]) {
-    const { assert!(ROUNDS % 2 == 0) }
+pub fn permute(state: &mut [u64; LANE_CNT]) {
+    const STEP_BY: usize = 2;
+    const { assert!(ROUNDS % STEP_BY == 0) }
 
-    for i in (0..ROUNDS).step_by(2) {
-        round(state, i);
-        round(state, i + 1);
+    for i in (0..ROUNDS).step_by(STEP_BY) {
+        roundx2(state, i);
     }
 }
