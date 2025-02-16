@@ -21,18 +21,21 @@ pub fn absorb<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; 25], offset: &mu
         let remaining_num_bytes = msg.len() - msg_offset;
         let absorbable_num_bytes = min(remaining_num_bytes, NUM_BYTES_IN_RATE - *offset);
         let effective_block_byte_len = *offset + absorbable_num_bytes;
-        let padded_efffective_block_len = (effective_block_byte_len + (KECCAK_WORD_BYTE_LEN - 1)) & KECCAK_WORD_BYTE_LEN.wrapping_neg();
+        let padded_effective_block_byte_len = (effective_block_byte_len + (KECCAK_WORD_BYTE_LEN - 1)) & KECCAK_WORD_BYTE_LEN.wrapping_neg();
+        let padded_effective_block_begins_at = *offset & KECCAK_WORD_BYTE_LEN.wrapping_neg();
 
-        block[..padded_efffective_block_len].fill(0);
+        block[padded_effective_block_begins_at..padded_effective_block_byte_len].fill(0);
         block[*offset..(*offset + absorbable_num_bytes)].copy_from_slice(&msg[msg_offset..(msg_offset + absorbable_num_bytes)]);
 
-        let mut state_word_index = 0;
-        block[..padded_efffective_block_len].chunks_exact(KECCAK_WORD_BYTE_LEN).for_each(|chunk_bytes| {
-            let chunk_as_word = u64::from_le_bytes(chunk_bytes.try_into().unwrap());
+        let mut state_word_index = padded_effective_block_begins_at / KECCAK_WORD_BYTE_LEN;
+        block[padded_effective_block_begins_at..padded_effective_block_byte_len]
+            .chunks_exact(KECCAK_WORD_BYTE_LEN)
+            .for_each(|chunk_bytes| {
+                let chunk_as_word = u64::from_le_bytes(chunk_bytes.try_into().unwrap());
 
-            state[state_word_index] ^= chunk_as_word;
-            state_word_index += 1;
-        });
+                state[state_word_index] ^= chunk_as_word;
+                state_word_index += 1;
+            });
 
         *offset += absorbable_num_bytes;
         msg_offset += absorbable_num_bytes;
