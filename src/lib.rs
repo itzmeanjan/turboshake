@@ -8,7 +8,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! turboshake = "=0.3.0"
+//! turboshake = "=0.3.1"
 //! ```
 //!
 //! Then, use it in your code:
