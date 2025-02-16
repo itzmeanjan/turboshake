@@ -8,7 +8,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! turboshake = "=0.3.0"
+//! turboshake = "=0.3.1"
 //! ```
 //!
 //! Then, use it in your code:
@@ -45,6 +45,7 @@ pub mod sponge;
 #[cfg(not(feature = "dev"))]
 mod sponge;
 
+mod branch_opt_util;
 mod tests;
 mod turboshake128;
 mod turboshake256;

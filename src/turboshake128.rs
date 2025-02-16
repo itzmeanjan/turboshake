@@ -1,4 +1,4 @@
-use crate::{keccak, sponge};
+use crate::{branch_opt_util, keccak, sponge};
 
 /// TurboSHAKE128 Extendable Output Function (XOF), which can produce an arbitrary amount of output, given an arbitrary length input.
 ///
@@ -67,7 +67,7 @@ impl TurboShake128 {
     /// assert!(shake.absorb(message));
     /// ```
     pub fn absorb(&mut self, msg: &[u8]) -> bool {
-        if self.is_ready == usize::MAX {
+        if branch_opt_util::unlikely(self.is_ready == usize::MAX) {
             return false;
         }
 
@@ -98,7 +98,7 @@ impl TurboShake128 {
         // See top of page 2 of https://ia.cr/2023/342
         const { assert!(D >= 0x01 && D <= 0x7f) };
 
-        if self.is_ready == usize::MAX {
+        if branch_opt_util::unlikely(self.is_ready == usize::MAX) {
             return false;
         }
 
@@ -131,7 +131,7 @@ impl TurboShake128 {
     /// assert!(shake.squeeze(&mut output));
     /// ```
     pub fn squeeze(&mut self, out: &mut [u8]) -> bool {
-        if self.is_ready != usize::MAX {
+        if branch_opt_util::unlikely(self.is_ready != usize::MAX) {
             return false;
         }
 
