@@ -87,10 +87,11 @@ pub fn squeeze<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; 25], readable: 
         let remaining_num_bytes = out.len() - out_offset;
         let squeezable_num_bytes = min(remaining_num_bytes, *readable);
         let effective_block_byte_len = state_byte_offset + squeezable_num_bytes;
-        let padded_efffective_block_len = (effective_block_byte_len + (KECCAK_WORD_BYTE_LEN - 1)) & KECCAK_WORD_BYTE_LEN.wrapping_neg();
+        let padded_efffective_block_byte_len = (effective_block_byte_len + (KECCAK_WORD_BYTE_LEN - 1)) & KECCAK_WORD_BYTE_LEN.wrapping_neg();
+        let padded_effective_block_begins_at = state_byte_offset & KECCAK_WORD_BYTE_LEN.wrapping_neg();
 
-        let mut state_word_index = 0;
-        block[..padded_efffective_block_len]
+        let mut state_word_index = padded_effective_block_begins_at / KECCAK_WORD_BYTE_LEN;
+        block[padded_effective_block_begins_at..padded_efffective_block_byte_len]
             .chunks_exact_mut(KECCAK_WORD_BYTE_LEN)
             .for_each(|chunk_bytes| {
                 chunk_bytes.copy_from_slice(&state[state_word_index].to_le_bytes());
