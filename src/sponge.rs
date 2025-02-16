@@ -1,4 +1,4 @@
-use crate::keccak;
+use crate::{branch_opt_util, keccak};
 use std::cmp::min;
 
 const KECCAK_WORD_BYTE_LEN: usize = keccak::W / 8;
@@ -40,7 +40,7 @@ pub fn absorb<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; 25], offset: &mu
         *offset += absorbable_num_bytes;
         msg_offset += absorbable_num_bytes;
 
-        if *offset == NUM_BYTES_IN_RATE {
+        if branch_opt_util::unlikely(*offset == NUM_BYTES_IN_RATE) {
             keccak::permute(state);
             *offset = 0;
         }
@@ -103,7 +103,7 @@ pub fn squeeze<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; 25], readable: 
         *readable -= squeezable_num_bytes;
         out_offset += squeezable_num_bytes;
 
-        if *readable == 0 {
+        if branch_opt_util::unlikely(*readable == 0) {
             keccak::permute(state);
             *readable = NUM_BYTES_IN_RATE;
         }
