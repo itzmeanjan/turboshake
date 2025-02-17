@@ -16,9 +16,6 @@ const MAX_ROUNDS: usize = 12 + 2 * L;
 /// Compile-time computed lane rotation factor table used when applying ρ step mapping function.
 const ROT: [usize; LANE_CNT] = compute_rotation_factors_table();
 
-/// Compile-time computed permutation table used when applying π step mapping function.
-const PERM: [usize; LANE_CNT] = compute_permutation_table();
-
 /// Compile-time computed round constants table used when applying ι step mapping function.
 const RC: [u64; ROUNDS] = compute_round_constants_table();
 
@@ -39,25 +36,6 @@ const fn compute_rotation_factors_table() -> [usize; LANE_CNT] {
         y = y_prime;
 
         t += 1;
-    }
-
-    table
-}
-
-/// Compile-time evaluable function for generating table used during application
-/// of π step mapping function on keccak-p\[1600, 12\] permutation state. See section
-/// 3.2.3 of the specification https://dx.doi.org/10.6028/NIST.FIPS.202.
-const fn compute_permutation_table() -> [usize; LANE_CNT] {
-    let mut table = [0usize; LANE_CNT];
-
-    let mut y = 0;
-    while y < 5 {
-        let mut x = 0;
-        while x < 5 {
-            table[y * 5 + x] = x * 5 + (x + 3 * y) % 5;
-            x += 1;
-        }
-        y += 1;
     }
 
     table
@@ -133,23 +111,24 @@ const fn compute_round_constants_table() -> [u64; ROUNDS] {
     table
 }
 
-/// Keccak-p\[1600, 12\] step mapping function θ, see section 3.2.1 of SHA3
-/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
+/// Keccak-p\[1600, 12\] round function, which applies all five step mapping functions in order, for four consecutive rounds
+/// starting from round index `ridx`, mutating state array, following section 3.3 of https://dx.doi.org/10.6028/NIST.FIPS.202.
 ///
-/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L145-L175
+/// Adapted from https://github.com/itzmeanjan/sha3/blob/b6ce9069/include/sha3/internals/keccak.hpp#L140-L583
 #[inline(always)]
-fn theta(state: &mut [u64; 25]) {
+fn roundx4(state: &mut [u64; LANE_CNT], ridx: usize) {
     let mut c = [0u64; 5];
+    let mut d = [0u64; 5];
+    let mut t;
 
-    for i in (0..25).step_by(5) {
-        c[0] ^= state[i];
+    // Round ridx + 0
+    for i in (0..LANE_CNT).step_by(5) {
+        c[0] ^= state[i + 0];
         c[1] ^= state[i + 1];
         c[2] ^= state[i + 2];
         c[3] ^= state[i + 3];
         c[4] ^= state[i + 4];
     }
-
-    let mut d = [0u64; 5];
 
     d[0] = c[4] ^ c[1].rotate_left(1);
     d[1] = c[0] ^ c[2].rotate_left(1);
@@ -157,76 +136,392 @@ fn theta(state: &mut [u64; 25]) {
     d[3] = c[2] ^ c[4].rotate_left(1);
     d[4] = c[3] ^ c[0].rotate_left(1);
 
-    for i in (0..25).step_by(5) {
-        state[i] ^= d[0];
-        state[i + 1] ^= d[1];
-        state[i + 2] ^= d[2];
-        state[i + 3] ^= d[3];
-        state[i + 4] ^= d[4];
+    c[0] = state[0] ^ d[0];
+    t = state[6] ^ d[1];
+    c[1] = t.rotate_left(ROT[6] as u32);
+    t = state[12] ^ d[2];
+    c[2] = t.rotate_left(ROT[12] as u32);
+    t = state[18] ^ d[3];
+    c[3] = t.rotate_left(ROT[18] as u32);
+    t = state[24] ^ d[4];
+    c[4] = t.rotate_left(ROT[24] as u32);
+
+    state[0] = c[0] ^ (c[2] & !c[1]) ^ RC[ridx];
+    state[6] = c[1] ^ (c[3] & !c[2]);
+    state[12] = c[2] ^ (c[4] & !c[3]);
+    state[18] = c[3] ^ (c[0] & !c[4]);
+    state[24] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[10] ^ d[0];
+    c[2] = t.rotate_left(ROT[10] as u32);
+    t = state[16] ^ d[1];
+    c[3] = t.rotate_left(ROT[16] as u32);
+    t = state[22] ^ d[2];
+    c[4] = t.rotate_left(ROT[22] as u32);
+    t = state[3] ^ d[3];
+    c[0] = t.rotate_left(ROT[3] as u32);
+    t = state[9] ^ d[4];
+    c[1] = t.rotate_left(ROT[9] as u32);
+
+    state[10] = c[0] ^ (c[2] & !c[1]);
+    state[16] = c[1] ^ (c[3] & !c[2]);
+    state[22] = c[2] ^ (c[4] & !c[3]);
+    state[3] = c[3] ^ (c[0] & !c[4]);
+    state[9] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[20] ^ d[0];
+    c[4] = t.rotate_left(ROT[20] as u32);
+    t = state[1] ^ d[1];
+    c[0] = t.rotate_left(ROT[1] as u32);
+    t = state[7] ^ d[2];
+    c[1] = t.rotate_left(ROT[7] as u32);
+    t = state[13] ^ d[3];
+    c[2] = t.rotate_left(ROT[13] as u32);
+    t = state[19] ^ d[4];
+    c[3] = t.rotate_left(ROT[19] as u32);
+
+    state[20] = c[0] ^ (c[2] & !c[1]);
+    state[1] = c[1] ^ (c[3] & !c[2]);
+    state[7] = c[2] ^ (c[4] & !c[3]);
+    state[13] = c[3] ^ (c[0] & !c[4]);
+    state[19] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[5] ^ d[0];
+    c[1] = t.rotate_left(ROT[5] as u32);
+    t = state[11] ^ d[1];
+    c[2] = t.rotate_left(ROT[11] as u32);
+    t = state[17] ^ d[2];
+    c[3] = t.rotate_left(ROT[17] as u32);
+    t = state[23] ^ d[3];
+    c[4] = t.rotate_left(ROT[23] as u32);
+    t = state[4] ^ d[4];
+    c[0] = t.rotate_left(ROT[4] as u32);
+
+    state[5] = c[0] ^ (c[2] & !c[1]);
+    state[11] = c[1] ^ (c[3] & !c[2]);
+    state[17] = c[2] ^ (c[4] & !c[3]);
+    state[23] = c[3] ^ (c[0] & !c[4]);
+    state[4] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[15] ^ d[0];
+    c[3] = t.rotate_left(ROT[15] as u32);
+    t = state[21] ^ d[1];
+    c[4] = t.rotate_left(ROT[21] as u32);
+    t = state[2] ^ d[2];
+    c[0] = t.rotate_left(ROT[2] as u32);
+    t = state[8] ^ d[3];
+    c[1] = t.rotate_left(ROT[8] as u32);
+    t = state[14] ^ d[4];
+    c[2] = t.rotate_left(ROT[14] as u32);
+
+    state[15] = c[0] ^ (c[2] & !c[1]);
+    state[21] = c[1] ^ (c[3] & !c[2]);
+    state[2] = c[2] ^ (c[4] & !c[3]);
+    state[8] = c[3] ^ (c[0] & !c[4]);
+    state[14] = c[4] ^ (c[1] & !c[0]);
+
+    // Round ridx + 1
+    c.fill(0);
+
+    for i in (0..LANE_CNT).step_by(5) {
+        c[0] ^= state[i + 0];
+        c[1] ^= state[i + 1];
+        c[2] ^= state[i + 2];
+        c[3] ^= state[i + 3];
+        c[4] ^= state[i + 4];
     }
-}
 
-/// Keccak-p\[1600, 12\] step mapping function ρ, see section 3.2.2 of SHA3
-/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
-///
-/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L177-L190
-#[inline(always)]
-fn rho(state: &mut [u64; 25]) {
-    state.iter_mut().enumerate().for_each(|(i, v)| *v = v.rotate_left(ROT[i] as u32));
-}
+    d[0] = c[4] ^ c[1].rotate_left(1);
+    d[1] = c[0] ^ c[2].rotate_left(1);
+    d[2] = c[1] ^ c[3].rotate_left(1);
+    d[3] = c[2] ^ c[4].rotate_left(1);
+    d[4] = c[3] ^ c[0].rotate_left(1);
 
-/// Keccak-p\[1600, 12\] step mapping function π, see section 3.2.3 of SHA3
-/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
-///
-/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L192-L207
-#[inline(always)]
-fn pi<T>(istate: &[T; 25], ostate: &mut [T; 25])
-where
-    T: Copy,
-{
-    ostate.iter_mut().enumerate().for_each(|(i, v)| *v = istate[PERM[i]]);
-}
+    c[0] = state[0] ^ d[0];
+    t = state[16] ^ d[1];
+    c[1] = t.rotate_left(ROT[6] as u32);
+    t = state[7] ^ d[2];
+    c[2] = t.rotate_left(ROT[12] as u32);
+    t = state[23] ^ d[3];
+    c[3] = t.rotate_left(ROT[18] as u32);
+    t = state[14] ^ d[4];
+    c[4] = t.rotate_left(ROT[24] as u32);
 
-/// Keccak-p\[1600, 12\] step mapping function χ, see section 3.2.4 of SHA3
-/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
-///
-/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L209-L227
-#[inline(always)]
-fn chi(istate: &[u64; 25], ostate: &mut [u64; 25]) {
-    for y in 0..5 {
-        let off = y * 5;
+    state[0] = c[0] ^ (c[2] & !c[1]) ^ RC[ridx + 1];
+    state[16] = c[1] ^ (c[3] & !c[2]);
+    state[7] = c[2] ^ (c[4] & !c[3]);
+    state[23] = c[3] ^ (c[0] & !c[4]);
+    state[14] = c[4] ^ (c[1] & !c[0]);
 
-        ostate[off] = istate[off] ^ (!istate[off + 1] & istate[off + 2]);
-        ostate[off + 1] = istate[off + 1] ^ (!istate[off + 2] & istate[off + 3]);
-        ostate[off + 2] = istate[off + 2] ^ (!istate[off + 3] & istate[off + 4]);
-        ostate[off + 3] = istate[off + 3] ^ (!istate[off + 4] & istate[off]);
-        ostate[off + 4] = istate[off + 4] ^ (!istate[off] & istate[off + 1]);
+    t = state[20] ^ d[0];
+    c[2] = t.rotate_left(ROT[10] as u32);
+    t = state[11] ^ d[1];
+    c[3] = t.rotate_left(ROT[16] as u32);
+    t = state[2] ^ d[2];
+    c[4] = t.rotate_left(ROT[22] as u32);
+    t = state[18] ^ d[3];
+    c[0] = t.rotate_left(ROT[3] as u32);
+    t = state[9] ^ d[4];
+    c[1] = t.rotate_left(ROT[9] as u32);
+
+    state[20] = c[0] ^ (c[2] & !c[1]);
+    state[11] = c[1] ^ (c[3] & !c[2]);
+    state[2] = c[2] ^ (c[4] & !c[3]);
+    state[18] = c[3] ^ (c[0] & !c[4]);
+    state[9] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[15] ^ d[0];
+    c[4] = t.rotate_left(ROT[20] as u32);
+    t = state[6] ^ d[1];
+    c[0] = t.rotate_left(ROT[1] as u32);
+    t = state[22] ^ d[2];
+    c[1] = t.rotate_left(ROT[7] as u32);
+    t = state[13] ^ d[3];
+    c[2] = t.rotate_left(ROT[13] as u32);
+    t = state[4] ^ d[4];
+    c[3] = t.rotate_left(ROT[19] as u32);
+
+    state[15] = c[0] ^ (c[2] & !c[1]);
+    state[6] = c[1] ^ (c[3] & !c[2]);
+    state[22] = c[2] ^ (c[4] & !c[3]);
+    state[13] = c[3] ^ (c[0] & !c[4]);
+    state[4] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[10] ^ d[0];
+    c[1] = t.rotate_left(ROT[5] as u32);
+    t = state[1] ^ d[1];
+    c[2] = t.rotate_left(ROT[11] as u32);
+    t = state[17] ^ d[2];
+    c[3] = t.rotate_left(ROT[17] as u32);
+    t = state[8] ^ d[3];
+    c[4] = t.rotate_left(ROT[23] as u32);
+    t = state[24] ^ d[4];
+    c[0] = t.rotate_left(ROT[4] as u32);
+
+    state[10] = c[0] ^ (c[2] & !c[1]);
+    state[1] = c[1] ^ (c[3] & !c[2]);
+    state[17] = c[2] ^ (c[4] & !c[3]);
+    state[8] = c[3] ^ (c[0] & !c[4]);
+    state[24] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[5] ^ d[0];
+    c[3] = t.rotate_left(ROT[15] as u32);
+    t = state[21] ^ d[1];
+    c[4] = t.rotate_left(ROT[21] as u32);
+    t = state[12] ^ d[2];
+    c[0] = t.rotate_left(ROT[2] as u32);
+    t = state[3] ^ d[3];
+    c[1] = t.rotate_left(ROT[8] as u32);
+    t = state[19] ^ d[4];
+    c[2] = t.rotate_left(ROT[14] as u32);
+
+    state[5] = c[0] ^ (c[2] & !c[1]);
+    state[21] = c[1] ^ (c[3] & !c[2]);
+    state[12] = c[2] ^ (c[4] & !c[3]);
+    state[3] = c[3] ^ (c[0] & !c[4]);
+    state[19] = c[4] ^ (c[1] & !c[0]);
+
+    // Round ridx + 2
+    c.fill(0);
+
+    for i in (0..LANE_CNT).step_by(5) {
+        c[0] ^= state[i + 0];
+        c[1] ^= state[i + 1];
+        c[2] ^= state[i + 2];
+        c[3] ^= state[i + 3];
+        c[4] ^= state[i + 4];
     }
-}
 
-/// Keccak-p\[1600, 12\] step mapping function ι, see section 3.2.5 of SHA3
-/// specification https://dx.doi.org/10.6028/NIST.FIPS.202
-///
-/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L229-L235
-#[inline(always)]
-fn iota(lane: u64, ridx: usize) -> u64 {
-    lane ^ RC[ridx]
-}
+    d[0] = c[4] ^ c[1].rotate_left(1);
+    d[1] = c[0] ^ c[2].rotate_left(1);
+    d[2] = c[1] ^ c[3].rotate_left(1);
+    d[3] = c[2] ^ c[4].rotate_left(1);
+    d[4] = c[3] ^ c[0].rotate_left(1);
 
-/// Keccak-p\[1600, 12\] round function, which applies all five
-/// step mapping functions in order, mutating state array, following
-/// section 3.3 of https://dx.doi.org/10.6028/NIST.FIPS.202
-///
-/// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L237-L251
-#[inline(always)]
-fn round(state: &mut [u64; 25], ridx: usize) {
-    let mut _state = [0u64; 25];
+    c[0] = state[0] ^ d[0];
+    t = state[11] ^ d[1];
+    c[1] = t.rotate_left(ROT[6] as u32);
+    t = state[22] ^ d[2];
+    c[2] = t.rotate_left(ROT[12] as u32);
+    t = state[8] ^ d[3];
+    c[3] = t.rotate_left(ROT[18] as u32);
+    t = state[19] ^ d[4];
+    c[4] = t.rotate_left(ROT[24] as u32);
 
-    theta(state);
-    rho(state);
-    pi(state, &mut _state);
-    chi(&_state, state);
-    state[0] = iota(state[0], ridx);
+    state[0] = c[0] ^ (c[2] & !c[1]) ^ RC[ridx + 2];
+    state[11] = c[1] ^ (c[3] & !c[2]);
+    state[22] = c[2] ^ (c[4] & !c[3]);
+    state[8] = c[3] ^ (c[0] & !c[4]);
+    state[19] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[15] ^ d[0];
+    c[2] = t.rotate_left(ROT[10] as u32);
+    t = state[1] ^ d[1];
+    c[3] = t.rotate_left(ROT[16] as u32);
+    t = state[12] ^ d[2];
+    c[4] = t.rotate_left(ROT[22] as u32);
+    t = state[23] ^ d[3];
+    c[0] = t.rotate_left(ROT[3] as u32);
+    t = state[9] ^ d[4];
+    c[1] = t.rotate_left(ROT[9] as u32);
+
+    state[15] = c[0] ^ (c[2] & !c[1]);
+    state[1] = c[1] ^ (c[3] & !c[2]);
+    state[12] = c[2] ^ (c[4] & !c[3]);
+    state[23] = c[3] ^ (c[0] & !c[4]);
+    state[9] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[5] ^ d[0];
+    c[4] = t.rotate_left(ROT[20] as u32);
+    t = state[16] ^ d[1];
+    c[0] = t.rotate_left(ROT[1] as u32);
+    t = state[2] ^ d[2];
+    c[1] = t.rotate_left(ROT[7] as u32);
+    t = state[13] ^ d[3];
+    c[2] = t.rotate_left(ROT[13] as u32);
+    t = state[24] ^ d[4];
+    c[3] = t.rotate_left(ROT[19] as u32);
+
+    state[5] = c[0] ^ (c[2] & !c[1]);
+    state[16] = c[1] ^ (c[3] & !c[2]);
+    state[2] = c[2] ^ (c[4] & !c[3]);
+    state[13] = c[3] ^ (c[0] & !c[4]);
+    state[24] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[20] ^ d[0];
+    c[1] = t.rotate_left(ROT[5] as u32);
+    t = state[6] ^ d[1];
+    c[2] = t.rotate_left(ROT[11] as u32);
+    t = state[17] ^ d[2];
+    c[3] = t.rotate_left(ROT[17] as u32);
+    t = state[3] ^ d[3];
+    c[4] = t.rotate_left(ROT[23] as u32);
+    t = state[14] ^ d[4];
+    c[0] = t.rotate_left(ROT[4] as u32);
+
+    state[20] = c[0] ^ (c[2] & !c[1]);
+    state[6] = c[1] ^ (c[3] & !c[2]);
+    state[17] = c[2] ^ (c[4] & !c[3]);
+    state[3] = c[3] ^ (c[0] & !c[4]);
+    state[14] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[10] ^ d[0];
+    c[3] = t.rotate_left(ROT[15] as u32);
+    t = state[21] ^ d[1];
+    c[4] = t.rotate_left(ROT[21] as u32);
+    t = state[7] ^ d[2];
+    c[0] = t.rotate_left(ROT[2] as u32);
+    t = state[18] ^ d[3];
+    c[1] = t.rotate_left(ROT[8] as u32);
+    t = state[4] ^ d[4];
+    c[2] = t.rotate_left(ROT[14] as u32);
+
+    state[10] = c[0] ^ (c[2] & !c[1]);
+    state[21] = c[1] ^ (c[3] & !c[2]);
+    state[7] = c[2] ^ (c[4] & !c[3]);
+    state[18] = c[3] ^ (c[0] & !c[4]);
+    state[4] = c[4] ^ (c[1] & !c[0]);
+
+    // Round ridx + 3
+    c.fill(0);
+
+    for i in (0..LANE_CNT).step_by(5) {
+        c[0] ^= state[i + 0];
+        c[1] ^= state[i + 1];
+        c[2] ^= state[i + 2];
+        c[3] ^= state[i + 3];
+        c[4] ^= state[i + 4];
+    }
+
+    d[0] = c[4] ^ c[1].rotate_left(1);
+    d[1] = c[0] ^ c[2].rotate_left(1);
+    d[2] = c[1] ^ c[3].rotate_left(1);
+    d[3] = c[2] ^ c[4].rotate_left(1);
+    d[4] = c[3] ^ c[0].rotate_left(1);
+
+    c[0] = state[0] ^ d[0];
+    t = state[1] ^ d[1];
+    c[1] = t.rotate_left(ROT[6] as u32);
+    t = state[2] ^ d[2];
+    c[2] = t.rotate_left(ROT[12] as u32);
+    t = state[3] ^ d[3];
+    c[3] = t.rotate_left(ROT[18] as u32);
+    t = state[4] ^ d[4];
+    c[4] = t.rotate_left(ROT[24] as u32);
+
+    state[0] = c[0] ^ (c[2] & !c[1]) ^ RC[ridx + 3];
+    state[1] = c[1] ^ (c[3] & !c[2]);
+    state[2] = c[2] ^ (c[4] & !c[3]);
+    state[3] = c[3] ^ (c[0] & !c[4]);
+    state[4] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[5] ^ d[0];
+    c[2] = t.rotate_left(ROT[10] as u32);
+    t = state[6] ^ d[1];
+    c[3] = t.rotate_left(ROT[16] as u32);
+    t = state[7] ^ d[2];
+    c[4] = t.rotate_left(ROT[22] as u32);
+    t = state[8] ^ d[3];
+    c[0] = t.rotate_left(ROT[3] as u32);
+    t = state[9] ^ d[4];
+    c[1] = t.rotate_left(ROT[9] as u32);
+
+    state[5] = c[0] ^ (c[2] & !c[1]);
+    state[6] = c[1] ^ (c[3] & !c[2]);
+    state[7] = c[2] ^ (c[4] & !c[3]);
+    state[8] = c[3] ^ (c[0] & !c[4]);
+    state[9] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[10] ^ d[0];
+    c[4] = t.rotate_left(ROT[20] as u32);
+    t = state[11] ^ d[1];
+    c[0] = t.rotate_left(ROT[1] as u32);
+    t = state[12] ^ d[2];
+    c[1] = t.rotate_left(ROT[7] as u32);
+    t = state[13] ^ d[3];
+    c[2] = t.rotate_left(ROT[13] as u32);
+    t = state[14] ^ d[4];
+    c[3] = t.rotate_left(ROT[19] as u32);
+
+    state[10] = c[0] ^ (c[2] & !c[1]);
+    state[11] = c[1] ^ (c[3] & !c[2]);
+    state[12] = c[2] ^ (c[4] & !c[3]);
+    state[13] = c[3] ^ (c[0] & !c[4]);
+    state[14] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[15] ^ d[0];
+    c[1] = t.rotate_left(ROT[5] as u32);
+    t = state[16] ^ d[1];
+    c[2] = t.rotate_left(ROT[11] as u32);
+    t = state[17] ^ d[2];
+    c[3] = t.rotate_left(ROT[17] as u32);
+    t = state[18] ^ d[3];
+    c[4] = t.rotate_left(ROT[23] as u32);
+    t = state[19] ^ d[4];
+    c[0] = t.rotate_left(ROT[4] as u32);
+
+    state[15] = c[0] ^ (c[2] & !c[1]);
+    state[16] = c[1] ^ (c[3] & !c[2]);
+    state[17] = c[2] ^ (c[4] & !c[3]);
+    state[18] = c[3] ^ (c[0] & !c[4]);
+    state[19] = c[4] ^ (c[1] & !c[0]);
+
+    t = state[20] ^ d[0];
+    c[3] = t.rotate_left(ROT[15] as u32);
+    t = state[21] ^ d[1];
+    c[4] = t.rotate_left(ROT[21] as u32);
+    t = state[22] ^ d[2];
+    c[0] = t.rotate_left(ROT[2] as u32);
+    t = state[23] ^ d[3];
+    c[1] = t.rotate_left(ROT[8] as u32);
+    t = state[24] ^ d[4];
+    c[2] = t.rotate_left(ROT[14] as u32);
+
+    state[20] = c[0] ^ (c[2] & !c[1]);
+    state[21] = c[1] ^ (c[3] & !c[2]);
+    state[22] = c[2] ^ (c[4] & !c[3]);
+    state[23] = c[3] ^ (c[0] & !c[4]);
+    state[24] = c[4] ^ (c[1] & !c[0]);
 }
 
 /// Keccak-p\[1600, 12\] permutation, applying 12 rounds of permutation
@@ -235,11 +530,11 @@ fn round(state: &mut [u64; 25], ridx: usize) {
 ///
 /// Adapted from https://github.com/itzmeanjan/sha3/blob/b5e897ed/include/keccak.hpp#L253-L493
 #[inline(always)]
-pub fn permute(state: &mut [u64; 25]) {
-    const { assert!(ROUNDS % 2 == 0) }
+pub fn permute(state: &mut [u64; LANE_CNT]) {
+    const STEP_BY: usize = 4;
+    const { assert!(ROUNDS % STEP_BY == 0) }
 
-    for i in (0..ROUNDS).step_by(2) {
-        round(state, i);
-        round(state, i + 1);
-    }
+    roundx4(state, 0);
+    roundx4(state, 4);
+    roundx4(state, 8);
 }
