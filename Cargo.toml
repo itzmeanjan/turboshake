@@ -1,9 +1,9 @@
 [package]
 name = "turboshake"
-version = "0.4.0"
-edition = "2021"
+version = "0.4.1"
+edition = "2024"
 resolver = "2"
-rust-version = "1.84.0"
+rust-version = "1.85.0"
 authors = ["Anjan Roy <hello@itzmeanjan.in>"]
 description = "A family of extendable output functions based on keccak-p[1600, 12] permutation"
 readme = "README.md"
