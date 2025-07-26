@@ -1,13 +1,17 @@
-use crate::{branch_opt_util, keccak, sponge};
+use crate::{branch_opt_util, error::TurboShakeError, keccak, sponge};
 
-/// TurboSHAKE256 Extendable Output Function (XOF), which can produce an arbitrary amount of output, given an arbitrary length input.
+/// TurboSHAKE256 Extendable Output Function (XOF)
+///
+/// Given any arbitrary length input, in incremental form or in one-shot form,
+/// it can produce an arbitrary long pseudo-random, deterministic output, offering
+/// at max 256-bits of security.
 ///
 /// See section 1 of TurboSHAKE specification https://ia.cr/2023/342.
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct TurboShake256 {
-    state: [u64; 25],
+    state: [u64; keccak::LANE_CNT],
     offset: usize,
-    is_ready: usize,
+    is_ready_to_squeeze: usize,
     squeezable: usize,
 }
 
@@ -18,21 +22,22 @@ impl Default for TurboShake256 {
     ///
     /// None
     ///
-    /// # Outputs
+    /// # Returns
     ///
     /// A default `TurboShake256` object.
     ///
     /// # Example
     ///
     /// ```
-    /// use turboshake::{TurboShake256};
-    /// let mut shake = TurboShake256::default();
+    /// use turboshake::TurboShake256;
+    ///
+    /// let mut ts = TurboShake256::default();
     /// ```
     fn default() -> Self {
         Self {
-            state: [0u64; 25],
+            state: [0u64; keccak::LANE_CNT],
             offset: 0,
-            is_ready: usize::MIN,
+            is_ready_to_squeeze: usize::MIN,
             squeezable: 0,
         }
     }
@@ -49,93 +54,105 @@ impl TurboShake256 {
     const RATE_BYTES: usize = Self::RATE_BITS / u8::BITS as usize;
 
     /// Absorbs arbitrary many input bytes into the TurboSHAKE256 sponge state.
+    /// It can be called as many times needed, as long as `finalize` has not been called.
     ///
     /// # Inputs
     ///
-    /// * `msg`: A slice of bytes to be absorbed.
+    /// * `msg`: An arbitrary length (including empty) slice of bytes to be absorbed.
     ///
-    /// # Outputs
+    /// # Returns
     ///
-    /// * `bool`: True if the absorption was successful, false otherwise.  Returns false if the instance has already been finalized.
+    /// * `Result<(), TurboShakeError>`: `Ok(())` if the absorption was successful.
+    /// Returns `Err(TurboShakeError::DataAbsorptionPhaseAlreadyFinalized)` if the instance has already been finalized.
     ///
     /// # Example
     ///
     /// ```
-    /// use turboshake::{TurboShake256};
-    /// let mut shake = TurboShake256::default();
+    /// use turboshake::TurboShake256;
+    ///
+    /// let mut ts = TurboShake256::default();
     /// let message = b"This is a test message";
-    /// assert!(shake.absorb(message));
+    /// assert_eq!(ts.absorb(message), Ok(()));
     /// ```
-    pub fn absorb(&mut self, msg: &[u8]) -> bool {
-        if branch_opt_util::unlikely(self.is_ready == usize::MAX) {
-            return false;
+    pub fn absorb(&mut self, msg: &[u8]) -> Result<(), TurboShakeError> {
+        if branch_opt_util::unlikely(self.is_ready_to_squeeze == usize::MAX) {
+            return Err(TurboShakeError::DataAbsorptionPhaseAlreadyFinalized);
         }
 
         sponge::absorb::<{ Self::RATE_BYTES }>(&mut self.state, &mut self.offset, msg);
-        true
+        Ok(())
     }
 
-    /// Finalizes the TurboSHAKE256 sponge state.
+    /// Finalizes the TurboSHAKE256 sponge state. After all input bytes are absorbed,
+    /// the sponge can be finalized, then it can only be used for squeezing output.
     ///
     /// # Inputs
     ///
     /// * `D`: A domain separator byte.  Consider using `TurboShake256::DEFAULT_DOMAIN_SEPARATOR` if you don't need multiple instances of TurboSHAKE256.
     ///
-    /// # Outputs
+    /// # Returns
     ///
-    /// * `bool`: True if the finalization was successful, false otherwise. Returns false if the instance has already been finalized.
+    /// * `Result<(), TurboShakeError>`: `Ok(())` if the finalization was successful.
+    /// Returns `Err(TurboShakeError::DataAbsorptionPhaseAlreadyFinalized)` if the instance has already been finalized.
     ///
     /// # Example
     ///
     /// ```
-    /// use turboshake::{TurboShake256};
-    /// let mut shake = TurboShake256::default();
+    /// use turboshake::TurboShake256;
+    ///
+    /// let mut ts = TurboShake256::default();
     /// let message = b"This is a test message";
-    /// assert!(shake.absorb(message));
-    /// assert!(shake.finalize::<{TurboShake256::DEFAULT_DOMAIN_SEPARATOR}>());
+    ///
+    /// assert_eq!(ts.absorb(message), Ok(()));
+    /// assert_eq!(ts.finalize::<{TurboShake256::DEFAULT_DOMAIN_SEPARATOR}>(), Ok(()));
     /// ```
-    pub fn finalize<const D: u8>(&mut self) -> bool {
+    pub fn finalize<const D: u8>(&mut self) -> Result<(), TurboShakeError> {
         // See top of page 2 of https://ia.cr/2023/342
         const { assert!(D >= 0x01 && D <= 0x7f) };
 
-        if branch_opt_util::unlikely(self.is_ready == usize::MAX) {
-            return false;
+        if branch_opt_util::unlikely(self.is_ready_to_squeeze == usize::MAX) {
+            return Err(TurboShakeError::DataAbsorptionPhaseAlreadyFinalized);
         }
 
         sponge::finalize::<{ Self::RATE_BYTES }, { D }>(&mut self.state, &mut self.offset);
 
-        self.is_ready = usize::MAX;
+        self.is_ready_to_squeeze = usize::MAX;
         self.squeezable = Self::RATE_BYTES;
-        true
+        Ok(())
     }
 
     /// Squeezes arbitrary many output bytes from the TurboSHAKE256 sponge state.
+    /// Only after the sponge state is finalized, it can be squeezed from.
     ///
     /// # Inputs
     ///
-    /// * `out`: A mutable slice of bytes to be filled with squeezed output.
+    /// * `out`: An arbitrary length (including empty) mutable slice of bytes to be filled with squeezed output.
     ///
     /// # Outputs
     ///
-    /// * `bool`: True if the squeezing was successful, false otherwise. Returns false if the instance has not been finalized.
+    /// * `Result<(), TurboShakeError>`: `Ok(())` if the squeezing was successful.
+    /// Returns `Err(TurboShakeError::StillInDataAbsorptionPhase)` if the instance has not yet been finalized.
     ///
     /// # Example
     ///
     /// ```
-    /// use turboshake::{TurboShake256};
-    /// let mut shake = TurboShake256::default();
+    /// use turboshake::TurboShake256;
+    ///
+    /// let mut ts = TurboShake256::default();
     /// let message = b"This is a test message";
-    /// assert!(shake.absorb(message));
-    /// assert!(shake.finalize::<{TurboShake256::DEFAULT_DOMAIN_SEPARATOR}>());
+    ///
+    /// assert_eq!(ts.absorb(message), Ok(()));
+    /// assert_eq!(ts.finalize::<{TurboShake256::DEFAULT_DOMAIN_SEPARATOR}>(), Ok(()));
+    ///
     /// let mut output = [0u8; 32];
-    /// assert!(shake.squeeze(&mut output));
+    /// assert_eq!(ts.squeeze(&mut output), Ok(()));
     /// ```
-    pub fn squeeze(&mut self, out: &mut [u8]) -> bool {
-        if branch_opt_util::unlikely(self.is_ready != usize::MAX) {
-            return false;
+    pub fn squeeze(&mut self, out: &mut [u8]) -> Result<(), TurboShakeError> {
+        if branch_opt_util::unlikely(self.is_ready_to_squeeze != usize::MAX) {
+            return Err(TurboShakeError::StillInDataAbsorptionPhase);
         }
 
         sponge::squeeze::<{ Self::RATE_BYTES }>(&mut self.state, &mut self.squeezable, out);
-        true
+        Ok(())
     }
 }

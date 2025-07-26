@@ -1,7 +1,7 @@
 use crate::{branch_opt_util, keccak};
 use std::cmp::min;
 
-const KECCAK_WORD_BYTE_LEN: usize = keccak::W / 8;
+const KECCAK_WORD_BYTE_LEN: usize = keccak::W / u8::BITS as usize;
 
 /// Given N -bytes message, this routine consumes it into Keccak\[c\] permutation state s.t.
 /// `offset` ( second parameter ) denotes how many bytes are already consumed into rate portion
@@ -11,7 +11,7 @@ const KECCAK_WORD_BYTE_LEN: usize = keccak::W / 8;
 /// - Rate portion will have bitwidth of 1600 - c.
 /// - `offset` will live in 0 <= offset < RATE_BYTES.
 #[inline(always)]
-pub fn absorb<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; 25], offset: &mut usize, msg: &[u8]) {
+pub fn absorb<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; keccak::LANE_CNT], offset: &mut usize, msg: &[u8]) {
     const { assert!(NUM_BYTES_IN_RATE % KECCAK_WORD_BYTE_LEN == 0) }
 
     let mut block = [0u8; NUM_BYTES_IN_RATE];
@@ -55,14 +55,14 @@ pub fn absorb<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; 25], offset: &mu
 /// - Rate portion will have bitwidth of 1600 - c.
 /// - `offset` will live in 0 <= offset < RATE_BYTES.
 #[inline(always)]
-pub fn finalize<const NUM_BYTES_IN_RATE: usize, const D: u8>(state: &mut [u64; 25], offset: &mut usize) {
-    let num_words_in_rate = const { NUM_BYTES_IN_RATE / 8 };
+pub fn finalize<const NUM_BYTES_IN_RATE: usize, const D: u8>(state: &mut [u64; keccak::LANE_CNT], offset: &mut usize) {
+    let num_words_in_rate = const { NUM_BYTES_IN_RATE / u8::BITS as usize };
     let state_word_index = *offset / KECCAK_WORD_BYTE_LEN;
     let byte_index_in_state_word = *offset % KECCAK_WORD_BYTE_LEN;
-    let shl_bit_offset = byte_index_in_state_word * 8;
+    let shl_bit_offset = byte_index_in_state_word * u8::BITS as usize;
 
     state[state_word_index] ^= (D as u64) << shl_bit_offset;
-    state[num_words_in_rate - 1] ^= 0x80u64 << 56;
+    state[num_words_in_rate - 1] ^= 0x80u64 << (keccak::W - u8::BITS as usize);
 
     keccak::permute(state);
     *offset = 0;
@@ -76,7 +76,7 @@ pub fn finalize<const NUM_BYTES_IN_RATE: usize, const D: u8>(state: &mut [u64; 2
 /// - `readable` denotes how many bytes can be squeezed without permutating the sponge state.
 /// - When `readable` becomes 0, state needs to be permutated again, after which RATE_BYTES can be squeezed.
 #[inline(always)]
-pub fn squeeze<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; 25], readable: &mut usize, out: &mut [u8]) {
+pub fn squeeze<const NUM_BYTES_IN_RATE: usize>(state: &mut [u64; keccak::LANE_CNT], readable: &mut usize, out: &mut [u8]) {
     const { assert!(NUM_BYTES_IN_RATE % KECCAK_WORD_BYTE_LEN == 0) }
 
     let mut block = [0u8; NUM_BYTES_IN_RATE];

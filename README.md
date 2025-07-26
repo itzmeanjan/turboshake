@@ -1,40 +1,108 @@
 # turboshake
-TurboSHAKE: A Family of e**X**tendable **O**utput **F**unctions based on round reduced ( 12 rounds ) Keccak[1600] Permutation.
+TurboSHAKE: A Family of e**X**tendable **O**utput **F**unctions (XOFs) based on round reduced (12 -rounds) Keccak[1600] permutation.
 
 ## Overview
-TurboSHAKE is a family of extendable output functions (xof) powered by round-reduced ( i.e. 12 -rounds ) Keccak-p[1600, 12] permutation. Keccak-p[1600, 12] has previously been used in fast parallel hashing algorithm KangarooTwelve ( more @ https://keccak.team/kangarootwelve.html ). Recently a formal specification, describing TurboSHAKE was released ( more @ https://ia.cr/2023/342 ) which generally exposes the underlying primitive of KangarooTwelve ( also known as **K12**, see https://blake12.org ) so that post-quantum public key cryptosystems ( such as ML-KEM, ML-DSA etc. - standardized by NIST ) might benefit from it ( more @ https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/5HveEPBsbxY ).
+TurboSHAKE is a family of extendable output functions (XOFs) powered by round-reduced (i.e. 12 -rounds) Keccak-p[1600, 12] permutation. Keccak-p[1600, 12] has previously been used in fast parallel hashing algorithm KangarooTwelve (more @ https://keccak.team/kangarootwelve.html). Recently a formal specification, describing TurboSHAKE was released (more @ https://ia.cr/2023/342) which generally exposes the underlying primitive of KangarooTwelve (also known as **K12**, see https://blake12.org) so that post-quantum public key cryptosystems (such as ML-KEM, ML-DSA etc. - standardized by NIST) might benefit from it (more @ https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/5HveEPBsbxY).
 
-Here I'm maintaining a Rust library which implements TurboSHAKE{128, 256} xof s.t. one can absorb arbitrary many bytes into sponge state, finalize sponge and squeeze arbitrary many bytes out of sponge. See [usage](#usage) section below for more info.
+Here I'm maintaining a zero-dependency Rust library which implements TurboSHAKE{128, 256} Xof s.t. one can absorb arbitrary many bytes into sponge state, by calling `absorb` function as many times needed; finalize sponge and then start squeezing arbitrary many bytes out of sponge, by caling `squeeze` as many times needed. See [usage](#usage) section below for more info.
 
 ## Prerequisites
-Rust stable toolchain; see https://rustup.rs for installation guide.
+Rust stable toolchain; see https://rustup.rs for installation guide. MSRV for this library crate is **1.85.0**.
 
 ```bash
 # When developing this library, I was using
 $ rustc --version
-rustc 1.84.1 (e71f9a9a9 2025-01-27)
+rustc 1.88.0 (6b00bc388 2025-06-23)
 ```
 
 ## Testing
-For ensuring functional correctness of TurboSHAKE{128, 256} implementation, I use test vectors from section 4 ( on page 9 ) and Appendix A ( on page 17 ) of https://datatracker.ietf.org/doc/draft-irtf-cfrg-kangarootwelve. Issue following command to run all test cases
+For ensuring functional correctness of TurboSHAKE{128, 256} implementation, I use test vectors from section 4 (on page 9) and Appendix A (on page 17) of https://datatracker.ietf.org/doc/draft-irtf-cfrg-kangarootwelve. Run following command(s) to run all test cases.
 
 ```bash
-cargo test
+# Running tests on host.
+make test
+
+# Testing on web assembly target, using `wasmtime`.
+rustup target add wasm32-wasip1
+cargo install wasmtime-cli --locked
+make test-wasm
 ```
 
+```bash
+running 16 tests
+test tests::state_transition_should_work_in_ts256 ... ok
+test tests::test_incremental_ts128_hashing::message_length_128b_digest_length_128b ... ok
+test tests::state_transition_should_work_in_ts128 ... ok
+test tests::test_incremental_ts128_hashing::message_length_32b_digest_length_32b ... ok
+test tests::test_incremental_ts256_hashing::message_length_128b_digest_length_128b ... ok
+test tests::test_incremental_ts256_hashing::message_length_32b_digest_length_32b ... ok
+test tests::test_incremental_ts128_hashing::message_length_2kb_digest_length_2kb ... ok
+test tests::test_incremental_ts128_hashing::message_length_512b_digest_length_512b ... ok
+test tests::test_incremental_ts256_hashing::message_length_512b_digest_length_512b ... ok
+test tests::test_incremental_ts256_hashing::message_length_2kb_digest_length_2kb ... ok
+test tests::test_incremental_ts128_hashing::message_length_8kb_digest_length_8kb ... ok
+test tests::test_incremental_ts256_hashing::message_length_8kb_digest_length_8kb ... ok
+test tests::test_incremental_ts128_hashing::message_length_32kb_digest_length_32kb ... ok
+test tests::test_incremental_ts256_hashing::message_length_32kb_digest_length_32kb ... ok
+test tests::test_turboshake128 ... ok
+test tests::test_turboshake256 ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+   Doc-tests turboshake
+
+running 9 tests
+test src/turboshake256.rs - turboshake256::TurboShake256::absorb (line 70) ... ok
+test src/turboshake128.rs - turboshake128::TurboShake128::squeeze (line 138) ... ok
+test src/turboshake256.rs - turboshake256::TurboShake256::squeeze (line 138) ... ok
+test src/lib.rs - (line 16) ... ok
+test src/turboshake128.rs - turboshake128::TurboShake128::default (line 31) ... ok
+test src/turboshake128.rs - turboshake128::TurboShake128::absorb (line 70) ... ok
+test src/turboshake128.rs - turboshake128::TurboShake128::finalize (line 100) ... ok
+test src/turboshake256.rs - turboshake256::TurboShake256::default (line 31) ... ok
+test src/turboshake256.rs - turboshake256::TurboShake256::finalize (line 100) ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+### Code Coverage
+To generate a detailed code coverage report in HTML format, use [cargo-tarpaulin](https://github.com/xd009642/tarpaulin):
+
+```bash
+# Install cargo-tarpaulin if not already installed
+cargo install cargo-tarpaulin
+make coverage
+```
+
+```bash
+Coverage Results:
+|| Tested/Total Lines:
+|| src/branch_opt_util.rs: 4/9
+|| src/error.rs: 0/6
+|| src/keccak.rs: 346/393
+|| src/sponge.rs: 52/56
+|| src/turboshake128.rs: 19/20
+|| src/turboshake256.rs: 19/20
+|| 
+87.30% coverage, 440/504 lines covered
+```
+
+This will create a HTML coverage report at `tarpaulin-report.html` that you can open in your web browser to view detailed line-by-line coverage information for all source files.
+
+> [!NOTE]
+> There is a help menu, which introduces you to all available commands; just run `$ make` from the root directory of this crate.
+
 ## Benchmarking
-Issue following command for benchmarking round-reduced Keccak-p[1600, 12] permutation and TurboSHAKE{128, 256} Xof, for variable input and output sizes.
+Run following command for benchmarking round-reduced Keccak-p[1600, 12] permutation and TurboSHAKE{128, 256} Xof, for variable input and output sizes.
 
 > [!WARNING]
 > When benchmarking make sure you've disabled CPU frequency scaling, otherwise numbers you see can be misleading. I found https://github.com/google/benchmark/blob/b40db869/docs/reducing_variance.md helpful.
 
 ```bash
-cargo bench --bench keccak --features=dev --profile optimized # Only keccak permutation
-cargo bench --bench turboshake --profile optimized            # Only TurboSHAKE{128, 256} Xof
-cargo bench --all-features --profile optimized                # Both of above
+make bench
 ```
 
-### On *12th Gen Intel(R) Core(TM) i7-1260P*
+### On 12th Gen Intel(R) Core(TM) i7-1260P
 Running kernel `Linux 6.11.0-14-generic x86_64`, with Rust compiler `1.84.1 (e71f9a9a9 2025-01-27)`, compiled in `optimized` mode.
 
 ```bash
@@ -87,7 +155,7 @@ Using TurboSHAKE{128, 256} Xof API is fairly easy.
 
 ```toml
 [dependencies]
-turboshake = "0.4.1"
+turboshake = "0.5.0"
 ```
 
 2) Create a TurboSHAKE{128, 256} Xof object.
@@ -107,9 +175,9 @@ fn main() {
 3) Absorb N(>=0) -bytes message into sponge state by invoking `absorb()` M(>1) -many times.
 
 ```rust
-hasher.absorb(&msg[..2]);
-hasher.absorb(&msg[2..4]);
-hasher.absorb(&msg[4..]);
+hasher.absorb(&msg[..2]).expect("data absorption must not fail");
+hasher.absorb(&msg[2..4]).expect("data absorption must not fail");
+hasher.absorb(&msg[4..]).expect("data absorption must not fail");
 ```
 
 4) When all message bytes are consumed, finalize sponge state by calling `finalize()`.
@@ -119,14 +187,14 @@ hasher.absorb(&msg[4..]);
 // You can use 0x1f ( i.e. default domain seperator value ) if you're not using
 // multiple instances of TurboSHAKE. Consider reading section 1 ( top of page 2 )
 // of TurboSHAKE specification https://eprint.iacr.org/2023/342.pdf.
-hasher.finalize::<{ turboshake::TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+hasher.finalize::<{ turboshake::TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>().expect("finalization must not fail");
 ```
 
 5) Now sponge is ready to be squeezed i.e. read arbitrary many bytes by invoking `squeeze()` arbitrary many times.
 
 ```rust
-hasher.squeeze(&mut dig[..16]);
-hasher.squeeze(&mut dig[16..]);
+hasher.squeeze(&mut dig[..16]).expect("data squeezing must not fail");
+hasher.squeeze(&mut dig[16..]).expect("data squeezing must not fail");
 ```
 
 I maintain two examples demonstrating use of TurboSHAKE{128, 256} Xof API.
@@ -134,17 +202,14 @@ I maintain two examples demonstrating use of TurboSHAKE{128, 256} Xof API.
 - [TurboSHAKE128](./examples/turboshake128.rs)
 - [TurboSHAKE256](./examples/turboshake256.rs)
 
-You should be able to run those examples with following commands
+You should be able to run those examples with `$ make example`
 
 ```bash
-cargo run --example turboshake128
+     Running `target/debug/examples/turboshake128`
+Message: e159c50514082cd410872dfd4c2b4930f3938820f98b0caae7ac6447919b05ec72848349e59a005f31ad4566fb6ed016c8b6495005a6b2782a6a2af478eda484
+Digest: d815057ae50debf6c2e70de88bb773ecbdd7674e7ac1277729d7d56132689262
 
-Message: 44abe2f57f3186dd40e761d955fbda1b0dd21a86ed17fdd0d389e1b578857b09a0ef1236ef02cefd6f7d7e7a23e1d200066361de50315655b614ef5f7f72f1e6
-Digest: 721f1b1c6afa722e10001f2e2058844756cdf51c4ca00179073665a34720b317
-
-# or
-cargo run --example turboshake256
-
-Message: 2f9f1b0bcf2b22a641ac3db02308c3bdf19acea8d271bd4d72d107c53b19e145fa520ffe15cdba0236131071b0d4f84cb57b2842220f5d13ff0393cb1c37d679
-Digest: 9e5310a6f2965899ebcdea891b01d08431957ad0dd12bee163c55c8e38b2cf4c
+     Running `target/debug/examples/turboshake256`
+Message: 7ce2691f95c35b9ed5b37e2971fd045a4d7a3660ef5ea0aa9baff27d8f04fd1e756bd7f4c746a41a7a32d7cb130a53290827188dcf037d8702bcc15147aee34c
+Digest: f205817dc34eff3c77a901aefbbc8130e0fd92899f6be2cd319b44c501b51865
 ```

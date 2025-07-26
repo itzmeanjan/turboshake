@@ -1,9 +1,8 @@
 use rand::prelude::*;
-use rand_chacha::ChaCha8Rng;
 use turboshake::TurboShake256;
 
 fn main() {
-    let mut rng = ChaCha8Rng::from_os_rng();
+    let mut rng = rand::rng();
 
     let mlen = 64;
     let mut msg = vec![0u8; mlen];
@@ -13,12 +12,16 @@ fn main() {
     let mut dig = vec![0u8; dlen];
 
     let mut hasher = TurboShake256::default();
-    hasher.absorb(&msg[..mlen / 2]);
-    hasher.absorb(&msg[mlen / 2..]);
-    hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
-    hasher.squeeze(&mut dig[..dlen / 2]);
-    hasher.squeeze(&mut dig[dlen / 2..]);
+    hasher.absorb(&msg[..mlen / 2]).expect("data absorption must not fail");
+    hasher.absorb(&msg[mlen / 2..]).expect("data absorption must not fail");
 
-    println!("Message: {}", hex::encode(&msg));
-    println!("Digest: {}", hex::encode(&dig));
+    hasher
+        .finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>()
+        .expect("finalization must not fail");
+
+    hasher.squeeze(&mut dig[..dlen / 2]).expect("data squeezing must not fail");
+    hasher.squeeze(&mut dig[dlen / 2..]).expect("data squeezing must not fail");
+
+    println!("Message: {}", const_hex::encode(&msg));
+    println!("Digest: {}", const_hex::encode(&dig));
 }

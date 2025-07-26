@@ -1,6 +1,6 @@
 //! # TurboShake
 //!
-//! TurboSHAKE is a family of extendable output functions (xof) powered by round-reduced ( i.e. 12 -rounds ) Keccak-p[1600, 12] permutation, proposed in https://ia.cr/2023/342.
+//! TurboSHAKE is a family of extendable output functions (XOFs) powered by round-reduced (i.e. 12 -rounds) Keccak-p\[1600, 12\] permutation, proposed in https://ia.cr/2023/342.
 //!
 //! ## Usage
 //!
@@ -8,7 +8,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! turboshake = "=0.4.1"
+//! turboshake = "=0.5.0"
 //! ```
 //!
 //! Then, use it in your code:
@@ -19,21 +19,21 @@
 //! let mut md = [0u8; 32];
 //!
 //! let mut ts128 = TurboShake128::default();
-//! ts128.absorb(b"hello");
-//! ts128.finalize::<{TurboShake128::DEFAULT_DOMAIN_SEPARATOR}>();
-//! ts128.squeeze(&mut md);
+//! ts128.absorb(b"hello").expect("must absorb data");
+//! ts128.finalize::<{TurboShake128::DEFAULT_DOMAIN_SEPARATOR}>().expect("must finalize");
+//! ts128.squeeze(&mut md).expect("must squeeze data");
 //!
 //! println!("TurboSHAKE128: {:x?}", md);
 //!
 //! let mut ts256 = TurboShake256::default();
-//! ts256.absorb(b"hello");
-//! ts256.finalize::<{TurboShake256::DEFAULT_DOMAIN_SEPARATOR}>();
-//! ts256.squeeze(&mut md);
+//! ts256.absorb(b"hello").expect("must absorb data");
+//! ts256.finalize::<{TurboShake256::DEFAULT_DOMAIN_SEPARATOR}>().expect("must finalize");
+//! ts256.squeeze(&mut md).expect("must squeeze data");
 //!
 //! println!("TurboSHAKE256: {:x?}", md);
 //! ```
 //!
-//! See project [README](https://github.com/itzmeanjan/turboshake) for more details.
+//! See project README @ <https://github.com/itzmeanjan/turboshake> for more details.
 
 #[cfg(feature = "dev")]
 pub mod keccak;
@@ -46,9 +46,11 @@ pub mod sponge;
 mod sponge;
 
 mod branch_opt_util;
+mod error;
 mod tests;
 mod turboshake128;
 mod turboshake256;
 
+pub use error::TurboShakeError;
 pub use turboshake128::TurboShake128;
 pub use turboshake256::TurboShake256;

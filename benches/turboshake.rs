@@ -1,7 +1,5 @@
-use divan;
 use divan::counter::{BytesCount, BytesFormat, ItemsCount};
 use rand::prelude::*;
-use rand_chacha::ChaCha8Rng;
 use std::fmt::Display;
 use turboshake::{TurboShake128, TurboShake256};
 
@@ -58,7 +56,7 @@ const ARGS: &[InputOutputSize] = &[
 
 #[divan::bench(args = ARGS)]
 fn turboshake128(bencher: divan::Bencher, io_size: &InputOutputSize) {
-    let mut rng = ChaCha8Rng::from_os_rng();
+    let mut rng = rand::rng();
 
     let mut msg = vec![0u8; io_size.msg_byte_len];
     let mut md = vec![0u8; io_size.md_byte_len];
@@ -73,15 +71,15 @@ fn turboshake128(bencher: divan::Bencher, io_size: &InputOutputSize) {
         .bench_values(|(msg, mut md)| {
             let mut hasher = TurboShake128::default();
 
-            hasher.absorb(divan::black_box(&msg));
-            hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
-            hasher.squeeze(divan::black_box(&mut md));
+            let _ = hasher.absorb(divan::black_box(&msg));
+            let _ = hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+            let _ = hasher.squeeze(divan::black_box(&mut md));
         });
 }
 
 #[divan::bench(args = ARGS)]
 fn turboshake256(bencher: divan::Bencher, io_size: &InputOutputSize) {
-    let mut rng = ChaCha8Rng::from_os_rng();
+    let mut rng = rand::rng();
 
     let mut msg = vec![0u8; io_size.msg_byte_len];
     let mut md = vec![0u8; io_size.md_byte_len];
@@ -96,8 +94,8 @@ fn turboshake256(bencher: divan::Bencher, io_size: &InputOutputSize) {
         .bench_values(|(msg, mut md)| {
             let mut hasher = TurboShake256::default();
 
-            hasher.absorb(divan::black_box(&msg));
-            hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
-            hasher.squeeze(divan::black_box(&mut md));
+            let _ = hasher.absorb(divan::black_box(&msg));
+            let _ = hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
+            let _ = hasher.squeeze(divan::black_box(&mut md));
         });
 }
