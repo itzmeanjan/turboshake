@@ -155,7 +155,7 @@ Using TurboSHAKE{128, 256} Xof API is fairly easy.
 
 ```toml
 [dependencies]
-turboshake = "0.4.1"
+turboshake = "0.5.0"
 ```
 
 2) Create a TurboSHAKE{128, 256} Xof object.
