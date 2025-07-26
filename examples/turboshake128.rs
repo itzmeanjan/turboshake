@@ -18,6 +18,6 @@ fn main() {
     hasher.squeeze(&mut dig[..dlen / 2]);
     hasher.squeeze(&mut dig[dlen / 2..]);
 
-    println!("Message: {}", hex::encode(&msg));
-    println!("Digest: {}", hex::encode(&dig));
+    println!("Message: {}", const_hex::encode(&msg));
+    println!("Digest: {}", const_hex::encode(&dig));
 }
