@@ -1,0 +1,60 @@
+name: Test TurboSHAKE
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        # See https://docs.github.com/en/actions/writing-workflows/choosing-where-your-workflow-runs/choosing-the-runner-for-a-job#standard-github-hosted-runners
+        # for available targets.
+        os: [
+            ubuntu-latest, # x86_64
+            ubuntu-24.04-arm, # arm64
+
+            macos-13, # x86_64
+            macos-latest, # arm64
+
+            windows-latest, # x86_64
+            windows-11-arm, # xarm64
+        ]
+        rust: [
+          1.85.0, # MSRV of this library crate
+          stable
+        ]
+      max-parallel: 4
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+
+      - name: Build and Test on ${{ matrix.os }}, with Rust ${{ matrix.rust }}
+        run: make test
+
+      - name: Run Examples on ${{ matrix.os }}, with Rust ${{ matrix.rust }}
+        run: make example
+      
+      - name: Add WebAssembly compilation target
+        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' # Because MSRV of wasmtime-cli is 1.86.0
+        run: |
+          rustup target add wasm32-wasip1
+          cargo install wasmtime-cli --locked
+
+      - name: Build and Test in WebAssembly environment
+        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        run: make test-wasm
+
+      - name: Run examples in WebAssembly environment
+        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        run: make example-wasm
+
