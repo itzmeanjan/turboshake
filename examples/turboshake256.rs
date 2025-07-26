@@ -12,11 +12,15 @@ fn main() {
     let mut dig = vec![0u8; dlen];
 
     let mut hasher = TurboShake256::default();
-    hasher.absorb(&msg[..mlen / 2]);
-    hasher.absorb(&msg[mlen / 2..]);
-    hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
-    hasher.squeeze(&mut dig[..dlen / 2]);
-    hasher.squeeze(&mut dig[dlen / 2..]);
+    hasher.absorb(&msg[..mlen / 2]).expect("data absorption must not fail");
+    hasher.absorb(&msg[mlen / 2..]).expect("data absorption must not fail");
+
+    hasher
+        .finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>()
+        .expect("finalization must not fail");
+
+    hasher.squeeze(&mut dig[..dlen / 2]).expect("data squeezing must not fail");
+    hasher.squeeze(&mut dig[dlen / 2..]).expect("data squeezing must not fail");
 
     println!("Message: {}", const_hex::encode(&msg));
     println!("Digest: {}", const_hex::encode(&dig));

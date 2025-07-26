@@ -71,9 +71,9 @@ fn turboshake128(bencher: divan::Bencher, io_size: &InputOutputSize) {
         .bench_values(|(msg, mut md)| {
             let mut hasher = TurboShake128::default();
 
-            hasher.absorb(divan::black_box(&msg));
-            hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
-            hasher.squeeze(divan::black_box(&mut md));
+            let _ = hasher.absorb(divan::black_box(&msg));
+            let _ = hasher.finalize::<{ TurboShake128::DEFAULT_DOMAIN_SEPARATOR }>();
+            let _ = hasher.squeeze(divan::black_box(&mut md));
         });
 }
 
@@ -94,8 +94,8 @@ fn turboshake256(bencher: divan::Bencher, io_size: &InputOutputSize) {
         .bench_values(|(msg, mut md)| {
             let mut hasher = TurboShake256::default();
 
-            hasher.absorb(divan::black_box(&msg));
-            hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
-            hasher.squeeze(divan::black_box(&mut md));
+            let _ = hasher.absorb(divan::black_box(&msg));
+            let _ = hasher.finalize::<{ TurboShake256::DEFAULT_DOMAIN_SEPARATOR }>();
+            let _ = hasher.squeeze(divan::black_box(&mut md));
         });
 }

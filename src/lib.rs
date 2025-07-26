@@ -46,9 +46,11 @@ pub mod sponge;
 mod sponge;
 
 mod branch_opt_util;
+mod error;
 mod tests;
 mod turboshake128;
 mod turboshake256;
 
+pub use error::TurboShakeError;
 pub use turboshake128::TurboShake128;
 pub use turboshake256::TurboShake256;
