@@ -123,7 +123,7 @@ fn roundx4(state: &mut [u64; LANE_CNT], ridx: usize) {
 
     // Round ridx + 0
     for i in (0..LANE_CNT).step_by(5) {
-        c[0] ^= state[i + 0];
+        c[0] ^= state[i];
         c[1] ^= state[i + 1];
         c[2] ^= state[i + 2];
         c[3] ^= state[i + 3];
@@ -224,7 +224,7 @@ fn roundx4(state: &mut [u64; LANE_CNT], ridx: usize) {
     c.fill(0);
 
     for i in (0..LANE_CNT).step_by(5) {
-        c[0] ^= state[i + 0];
+        c[0] ^= state[i];
         c[1] ^= state[i + 1];
         c[2] ^= state[i + 2];
         c[3] ^= state[i + 3];
@@ -325,7 +325,7 @@ fn roundx4(state: &mut [u64; LANE_CNT], ridx: usize) {
     c.fill(0);
 
     for i in (0..LANE_CNT).step_by(5) {
-        c[0] ^= state[i + 0];
+        c[0] ^= state[i];
         c[1] ^= state[i + 1];
         c[2] ^= state[i + 2];
         c[3] ^= state[i + 3];
@@ -426,7 +426,7 @@ fn roundx4(state: &mut [u64; LANE_CNT], ridx: usize) {
     c.fill(0);
 
     for i in (0..LANE_CNT).step_by(5) {
-        c[0] ^= state[i + 0];
+        c[0] ^= state[i];
         c[1] ^= state[i + 1];
         c[2] ^= state[i + 2];
         c[3] ^= state[i + 3];

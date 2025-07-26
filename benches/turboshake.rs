@@ -1,4 +1,3 @@
-use divan;
 use divan::counter::{BytesCount, BytesFormat, ItemsCount};
 use rand::prelude::*;
 use std::fmt::Display;
