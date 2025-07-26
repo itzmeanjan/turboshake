@@ -1,7 +1,6 @@
 use divan;
 use divan::counter::{BytesCount, BytesFormat, ItemsCount};
 use rand::prelude::*;
-use rand_chacha::ChaCha8Rng;
 use turboshake::keccak;
 
 fn main() {
@@ -10,7 +9,7 @@ fn main() {
 
 #[divan::bench]
 fn permute_12_rounds(bencher: divan::Bencher) {
-    let mut rng = ChaCha8Rng::from_os_rng();
+    let mut rng = rand::rng();
 
     let mut state = [0u64; 25];
     let state_byte_len = state.len() * 8;

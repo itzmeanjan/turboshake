@@ -1,9 +1,8 @@
 use rand::prelude::*;
-use rand_chacha::ChaCha8Rng;
 use turboshake::TurboShake128;
 
 fn main() {
-    let mut rng = ChaCha8Rng::from_os_rng();
+    let mut rng = rand::rng();
 
     let mlen = 64;
     let mut msg = vec![0u8; mlen];
